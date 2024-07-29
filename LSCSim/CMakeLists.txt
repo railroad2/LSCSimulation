@@ -28,7 +28,7 @@ install(PROGRAMS
 # ----------------------------------------------------------------------------
 # build executables
 # ----------------------------------------------------------------------------
-set(LINK_PACKAGES MCObjs GLG4Sim LSCSim)
+set(LINK_PACKAGES LSCSim MCObjs GLG4Sim)
 set(LINK_EXTERNALS ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
 
 file(GLOB ${PROJECT_NAME}_EXECUTABLES ${PROJECT_SOURCE_DIR}/test/*.cc)
