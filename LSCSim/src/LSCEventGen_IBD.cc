@@ -1,34 +1,194 @@
 #include <iostream>
+#include <cmath>
 
 #include "Randomize.hh"
 #include "G4PhysicalConstants.hh"
 
-#include "LSCEvtGen/LSCEvtGen.hh"
+#include "LSCSim/LSCEventGen.hh"
 #include "GLG4Sim/GLG4PosGen.hh"
+
+#define DEBUG   0
+
+#define Mp      proton_mass_c2 
+#define Mn      neutron_mass_c2
+#define Me      electron_mass_c2
+#define M       ((Mp + Mn) / 2)
+#define Delta   (Mn - Mp)
 
 using namespace std;
 
-LSCEventGen_IBD::LSCEventGen_IBD(const char *arg_dbname)
-    : GLG4VVertexGen(arg_dbname), 
-      _v0(-12),
-      _p0(2212),
-      _e1(-11),
-      _n1(2112)
-{}
-      
+double GetDifCrossSection(double E, double theta);
+double GetDifCrossSection_costheta(double E, double theta); 
 
-void LSCEventGen_IBD::GeneratePrimaryVertex(G4Event * argEvent)
+LSCEventGen_IBD::LSCEventGen_IBD(const char *arg_dbname)
+    : LSCEventGen(arg_dbname)
 {
+    SetSeed(-1);
+    _pv0 = G4LorentzVector(0, 0, 0, 0);
+    _pp0 = G4LorentzVector(0, 0, 0, 0);
+    _pe1 = G4LorentzVector(0, 0, 0, 0);
+    _pn1 = G4LorentzVector(0, 0, 0, 0);
 }
 
-void LSCEventGen_IBD::GenerateIBD(double Ev, G4ThreeVector uv, double theta=-1) 
+
+void LSCEventGen_IBD::GeneratePrimaryVertex(G4Event * argEvent)
+{ return; }
+
+
+void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1) 
 {
-    _v0.Set4Momentum(uv.x(), uv.y(), uv.z(), Ev); // xyzt
+    double phi = -1;
+
+    G4ThreeVector uv0 = uv / sqrt(uv.dot(uv)); // normalize
+
+    _pv0.set(uv0*Ev, Ev);
+    _pp0.set(0, 0, 0, Mp);
+
     if (theta == -1) {
         theta = G4UniformRand() * pi; 
     }
 
-    cout << _v0 << endl;
-    cout << theta << endl;
+    if (phi == -1) {
+        phi = G4UniformRand() * 2 * pi;
+    }
+
+    double Ee1 = GetEe1(Ev, theta);
+    double pe1 = sqrt(Ee1*Ee1 - Me*Me);
+
+    _pe1.setRThetaPhi(pe1, theta, phi);
+    _pe1.setE(Ee1);
+    _pe1.rotateUz(uv0);
+    _pn1 = _pv0 + _pp0 - _pe1;
+            
+#if DEBUG > 1
+    cerr << "#DEBUG: Positron momentum calculation" << endl;
+    cerr << "#DEBUG:  theta\t" << theta << endl;
+    cerr << "#DEBUG:  phi\t"   << phi << endl;
+    cerr << "#DEBUG:  pe1\t"   << pe1 << endl;
+    cerr << "#DEBUG:  Ee1\t"   << Ee1 << endl;
+    cerr << "#DEBUG:  _pe1\t"   << _pe1 << endl;
+#endif
+
+#if DEBUG 
+    cerr << "#DEBUG: Four momentum vectors" << endl;
+    cerr << "#DEBUG:  _pv0\t" << _pv0 << endl;
+    cerr << "#DEBUG:  _pp0\t" << _pp0 << endl;
+    cerr << "#DEBUG:  _pe0\t" << _pe1 << endl;
+    cerr << "#DEBUG:  _pn0\t" << _pn1 << endl;
+    cerr << "#DEBUG:  total\t" << _pn1 + _pe1 - _pv0 - _pp0 << endl;
+#endif
+
+    return;
+} 
+
+void LSCEventGen_IBD::SetFormat_HEPEvt()
+{
+    // neutrino
+    Form_HEPEvt tmp;
+
+    tmp = {0, -12, 0, 0, 
+           _pv0.x()*1e-3, _pv0.y()*1e-3, _pv0.z()*1e-3, _pv0.t()*1e-3,  // momentum in GeV
+           0,                          // dt in ns
+           _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
+           0, 0, 0};                   // polarization
+    _evt.push_back(tmp); 
+
+    // _positron
+    tmp = {0, -11, 0, 0, 
+           _pe1.x()*1e-3, _pe1.y()*1e-3, _pe1.z()*1e-3, _pe1.t()*1e-3,  // momentum in GeV
+           0,                          // dt in ns
+           _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
+           0, 0, 0};                   // polarization
+    _evt.push_back(tmp);
+
+    // neutron
+    tmp = {0, 2112, 0, 0, 
+           _pn1.x()*1e-3, _pn1.y()*1e-3, _pn1.z()*1e-3, _pn1.t()*1e-3,  // momentum in GeV
+           0,                          // dt in ns
+           _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
+           0, 0, 0};                   // polarization
+    _evt.push_back(tmp);
+}
+
+
+double LSCEventGen_IBD::GetEe1(double E, double theta)
+{
+    /*-----------------------------------------------------------------
+    Computes energy transfer from neutrino to positron 
+    masses and energies are in MeV.
+    E is neutrino energy and theta is scattered angle of the positron. 
+    -----------------------------------------------------------------*/
+
+    double costheta = cos(theta);
+    double Ee0      = E - Delta;
+
+    if (Ee0 < Me) { return 0; }
+
+    double pe0 = sqrt(Ee0*Ee0 - Me*Me);
+    double ve0 = pe0 / Ee0;
+    double d1  = E/M * (1 - ve0 * costheta);
+    double d2  = (Delta*Delta - Me*Me) / (2*M);
+    double Ee1 = Ee0 * (1 - d1) - d2;
+
+    if (Ee1*Ee1 - Me*Me < 0) { return 0; }
+    else { return Ee1; }
+}
+
+
+double GetDifCrossSection(double E, double theta)
+{
+    return GetDifCrossSection_costheta(E, cos(theta));
+}
+
+double GetDifCrossSection_costheta(double E, double costheta)
+{
+    /*-----------------------------------------------------------------
+    Computes differential cross section 
+    for the given neutrino energy, E,
+    and the positron scattering angle, theta.
+    Vogel P., Beacom J. F. (1999) Phys Rev D 60 53003 
+    -----------------------------------------------------------------*/
+
+    double Ee0   = E - Delta;
+
+    if (Ee0 < Me) { return 0; }
+
+    double pe0   = sqrt(Ee0*Ee0 - Me*Me);
+    double ve0   = pe0/Ee0;
+
+    double f     = 1.0;
+    double g     = 1.26;
+    double f2    = 3.706;
+
+    double c1    = 2*(f + f2)*g;
+    double c2    = f*f + g*g;
+    double c3    = f*f + 3*g*g;
+    double c4    = f*f - g*g;
+
+    double d1    = E/M * (1 - ve0*costheta);
+    double d2    = (Delta*Delta - Me*Me)/2/M;
+    double Ee1   = Ee0*(1 - d1) - d2;
+
+    if (Ee1*Ee1 - Me*Me < 0) { return 0; }
+
+    double pe1   = sqrt(Ee1*Ee1 - Me*Me);
+    double ve1   = pe1/Ee1;
+
+    double gamma; 
+    gamma  = c1*((2*Ee0 + Delta)*(1 - ve0*costheta) - Me*Me/Ee0);
+    gamma += c2*(Delta*(1 + ve0*costheta) + Me*Me/Ee0);
+    gamma += c3*((Ee0 + Delta)*(1 - ve0*costheta) - Delta);
+    gamma += c4*((Ee0 + Delta)*(1 - ve0*costheta) - Delta) * ve0*costheta;
+
+    double GF = 1.16637e-11;
+    double Vud = 0.97373;
+    double delta_inner = 0.024;
+    double hbarc = 197.327053;
+
+    double sig_0 = GF*GF * Vud*Vud / pi * (1. + delta_inner) * hbarc * hbarc * 1e-26;
+    double dsig = (c3 + c4*ve1*costheta)*Ee1*pe1 - gamma*Ee0*pe0/M;                         
+    dsig *= sig_0 / 2;
+
+    return dsig;
 }
 

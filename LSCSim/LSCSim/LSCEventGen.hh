@@ -1,14 +1,40 @@
-//
+// Event generator
 
 #ifndef __LSCEvtGen_hh__
 #define __LSCEvtGen_hh__ 
 
-#include "GLG4VertexGen.hh"
+#include <vector>
 
-class LSCEventGen : public GLG4VVertexGen {
+#include "G4ThreeVector.hh"
+#include "G4LorentzVector.hh"
+#include "Randomize.hh"
+
+#include "GLG4Sim/GLG4VertexGen.hh"
+
+typedef struct _Form_HEPEvt {
+    int     ISTHEP; // status code
+    long    IDHEP;  // HEP PDG code
+    int     JDAHEP1; // first daughter
+    int     JDAHEP2; // last daughter
+    double  PHEP1;  // px in GeV
+    double  PHEP2;  // py in GeV
+    double  PHEP3;  // pz in GeV
+    double  PHEP5;  // mass in GeV                                                        
+    double  DT;     // vertex _delta_ time, in ns (*)                                     
+    double  X;      // x vertex in mm                                                     
+    double  Y;      // y vertex in mm                                                     
+    double  Z;      // z vertex in mm                                                     
+    double  PLX;    // x polarization                                                     
+    double  PLY;    // y polarization                                                     
+    double  PLZ;    // z polarization                                                     
+} Form_HEPEvt;
+
+
+class LSCEventGen : public GLG4VVertexGen 
+{
 public:
-    virtual LSCEventGen(const char * arg_dbname) : _dbname(arg_dbname) {}
-    virtual ~LSCEventGen() {}
+    LSCEventGen(const char * arg_dbname) : GLG4VVertexGen(arg_dbname) {}
+    ~LSCEventGen() {}
     
     virtual void GeneratePrimaryVertex(G4Event * argEvent) = 0;
     virtual void SetState(G4String newValues) = 0;
@@ -17,44 +43,70 @@ public:
     void Print_HEPEvt();
 
     // set functions
-    void SetSeed(double seed) { _rseed = seed; }
+    void SetSeed(long seed);
 
     // get functions
-    double GetSeed() const { return _rseed; }
+    long GetSeed() const { return _rseed; }
+    std::vector<Form_HEPEvt> _evt;
 
 private:
-    double _rseed = 0;
+    long _rseed = 42;
 };
 
 
-class LSCEventGen_IBD : public LSCEventGen {
+class LSCEventGen_IBD : public LSCEventGen 
+{
 public:
-    virtual LSCEventGen(const char * arg_dbname);
-    virtual ~LSCEventGen();
-    virtual void GeneratePrimaryVertex(G4Event * argEvent);
-    virtual void SetState(G4String newValues); 
+    LSCEventGen_IBD(const char * arg_dbname);
+    ~LSCEventGen_IBD() {}
 
-    void GenerateIBD(double Ev);
+    virtual void GeneratePrimaryVertex(G4Event * argEvent);
+    virtual void SetState(G4String newValues) {}
+    virtual G4String GetState() { return ""; }
+
+    void GenerateEvent(double Ev, G4ThreeVector uv, double theta);
+    void SetFormat_HEPEvt();
+
+    double GetEe1(double T, double theta);
+    
 private:
-    G4PrimaryParticle* _v0;  // incoming neutrino
-    G4PrimaryParticle* _p0;  // proton
-    G4PrimaryParticle* _e1;  // positron
-    G4PrimaryParticle* _n1;  // neutron
+    G4ThreeVector _pos;
+    G4LorentzVector _pv0;  // momentum of the incoming neutrino
+    G4LorentzVector _pp0;  // proton
+    G4LorentzVector _pe1;  // positron
+    G4LorentzVector _pn1;  // neutron
 };
 
 
-class LSCEventGen_ve : public LSCEventGen {
+class LSCEventGen_ve : public LSCEventGen 
+{
 public:
-    virtual LSCEventGen(const char * arg_dbname);
-    virtual ~LSCEventGen();
+    LSCEventGen_ve(const char * arg_dbname);
+    ~LSCEventGen_ve() {}
+
     virtual void GeneratePrimaryVertex(G4Event * argEvent);
-    virtual void SetState(G4String newValues);
+    virtual void SetState(G4String newValues) {}
+    virtual G4String GetState() { return ""; }
+
+    void GenerateEvent(double Ev, G4ThreeVector uv, double theta);
+    void SetFormat_HEPEvt();
+
+    double GetEe1(double T, double theta);
+    double DiLog(double y);
+
+    double GetDifCrossSection(double E, double theta, G4String vflavour);
+    double GetDifCrossSection_T(double E, double T, G4String vflavour);
+    double GetDifCrossSection_costheta(double E, double costheta, G4String vflavour);
+
 
 private:
-    G4PrimaryParticle* _v0; // incoming neutrino
-    G4PrimaryParticle* _e0; // electron
-    G4PrimaryParticle* _v1; // neutrino
-    G4PrimaryParticle* _e1; // electron
+    G4String _vflavour;
+    G4ThreeVector _pos;
+    G4LorentzVector _pv0; // momentum of the incoming neutrino
+    G4LorentzVector _pe0; // initial electron
+    G4LorentzVector _pv1; // neutrino
+    G4LorentzVector _pe1; // electron
 };
 
+#endif
 
