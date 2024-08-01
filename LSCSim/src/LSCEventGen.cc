@@ -34,6 +34,8 @@ void LSCEventGen::Print_HEPEvt()
     cerr << "#DEBUG: Print_HEPEvt()" << endl;
 #endif
 
+    SetForm_HEPEvt();
+
     int print_pol = 0;
 
     if (_evt[0].PLX == 0 && _evt[0].PLY == 0 && _evt[0].PLZ == 0) 

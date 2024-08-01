@@ -18,7 +18,6 @@ int doit()
 
     evtgen->GeneratePosition();
     evtgen->GenerateEvent(Ev, uv, theta); 
-    evtgen->SetFormat_HEPEvt();
     evtgen->Print_HEPEvt();
 
     delete (evtgen);

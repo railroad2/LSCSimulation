@@ -83,7 +83,7 @@ void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
     return;
 } 
 
-void LSCEventGen_IBD::SetFormat_HEPEvt()
+void LSCEventGen_IBD::SetForm_HEPEvt()
 {
     // neutrino
     Form_HEPEvt tmp;

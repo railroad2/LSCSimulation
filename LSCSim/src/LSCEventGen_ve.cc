@@ -82,9 +82,10 @@ void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
 }
 
 
-void LSCEventGen_ve::SetFormat_HEPEvt()
+void LSCEventGen_ve::SetForm_HEPEvt()
 {
     Form_HEPEvt tmp;
+    vector<Form_HEPEvt> evt;
     int IDv = IDve;
 
     if      (_vflavour == "e")   IDv = IDve;
@@ -100,7 +101,7 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
-    _evt.push_back(tmp); 
+    evt.push_back(tmp); 
 
     // electron
     tmp = {0, IDe, 0, 0, 
@@ -109,7 +110,7 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
-    _evt.push_back(tmp);
+    evt.push_back(tmp);
 
     // neutrino
     tmp = {0, IDv, 0, 0, 
@@ -118,7 +119,9 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
-    _evt.push_back(tmp);
+    evt.push_back(tmp);
+
+    _evt = evt;
 }
 
 

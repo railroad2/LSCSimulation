@@ -42,6 +42,7 @@ public:
     virtual G4String GetState() = 0;
 
     void GeneratePosition();
+    virtual void SetForm_HEPEvt() = 0;
     void Print_HEPEvt();
 
     // set functions
@@ -75,7 +76,7 @@ public:
     virtual G4String GetState() { return ""; }
 
     void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
-    void SetFormat_HEPEvt();
+    void SetForm_HEPEvt();
 
     double GetEe1(double T, double theta);
     double GetDifCrossSection(double E, double theta);
@@ -104,7 +105,7 @@ public:
     virtual G4String GetState() { return ""; }
 
     void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
-    void SetFormat_HEPEvt();
+    void SetForm_HEPEvt();
 
     double GetEe1(double T, double theta);
     double DiLog(double y);

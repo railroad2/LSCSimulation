@@ -16,7 +16,6 @@ int doit()
     evtgen->ReadGeometryFile(fn_geom);
     evtgen->GeneratePosition();
     evtgen->GenerateEvent(Ev, uv, theta); 
-    evtgen->SetFormat_HEPEvt();
     evtgen->Print_HEPEvt();
 
     return 0;
