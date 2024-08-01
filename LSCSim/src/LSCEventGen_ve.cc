@@ -31,7 +31,7 @@ void LSCEventGen_ve::GeneratePrimaryVertex(G4Event * argEvent)
 { ; }
 
 
-void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1)
+void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
 {
     double phi = -1;
 
@@ -40,7 +40,11 @@ void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1)
     _pv0.set(uv0*Ev, Ev);
     _pe0.set(0, 0, 0, Me);
 
+    G4String vflavour = "e";
+
     if (theta == -1) {
+        SetPDF(Ev, vflavour);
+        G4RandGeneral rngtheta(_PDF, 721);
         theta = G4UniformRand() * pi / 2; 
     }
 
@@ -55,6 +59,7 @@ void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1)
     _pe1.setE(Ee1);
     _pe1.rotateUz(uv0);
     _pv1 = _pv0 + _pe0 - _pe1;
+    _pv1.setE(sqrt(_pv1.vect()*_pv1.vect()));
 
 #if DEBUG > 1
     cerr << "#DEBUG: Positron momentum calculation" << endl;
@@ -86,9 +91,12 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
     else if (_vflavour == "mu")  IDv = IDvmu;
     else if (_vflavour == "tau") IDv = IDvtau;
 
+    double to_GeV = 1e-3;
+
     // incoming neutrino
     tmp = {0, IDv, 0, 0, 
-           _pv0.x()*1e-3, _pv0.y()*1e-3, _pv0.z()*1e-3, _pv0.t()*1e-3,  // momentum in GeV
+           _pv0.x()*to_GeV, _pv0.y()*to_GeV, _pv0.z()*to_GeV, // momentum in GeV
+           _pv0.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
@@ -96,7 +104,8 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
 
     // electron
     tmp = {0, IDe, 0, 0, 
-           _pe1.x()*1e-3, _pe1.y()*1e-3, _pe1.z()*1e-3, _pe1.t()*1e-3,  // momentum in GeV
+           _pe1.x()*to_GeV, _pe1.y()*to_GeV, _pe1.z()*to_GeV, // momentum in GeV
+           _pe1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
@@ -104,7 +113,8 @@ void LSCEventGen_ve::SetFormat_HEPEvt()
 
     // neutrino
     tmp = {0, IDv, 0, 0, 
-           _pv1.x()*1e-3, _pv1.y()*1e-3, _pv1.z()*1e-3, _pv1.t()*1e-3,  // momentum in GeV
+           _pv1.x()*to_GeV, _pv1.y()*to_GeV, _pv1.z()*to_GeV, // momentum in GeV
+           _pv1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
            0, 0, 0};                      // polarization
@@ -237,4 +247,15 @@ double LSCEventGen_ve::GetDifCrossSection(double E, double theta, G4String vflav
     return GetDifCrossSection_costheta(E, costheta, vflavour);
 }
 
+
+void LSCEventGen_ve::SetPDF(double E, G4String vflavour)
+{
+    double theta = 0;
+    double dtheta = pi / 720;
+
+    for (int i=0; i<721; i++) {
+        theta = i*dtheta;
+        _PDF[i] = GetDifCrossSection(E, theta, vflavour)*1e45;
+    }
+}
 

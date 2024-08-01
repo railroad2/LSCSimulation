@@ -1,12 +1,22 @@
-#include "LSCSim/LSCEventGen.hh"
 
 #include <iostream>
 #include <sys/time.h>
 #include <ctime>
 
+#include "G4PhysicalConstants.hh"
+
+#include "LSCSim/LSCEventGen.hh"
+#include "GLG4Sim/GLG4param.hh"
+
 using namespace std;
 
-void LSCEventGen::SetSeed(long seed=-1)
+LSCEventGen::LSCEventGen(const char * arg_dbname) 
+    : GLG4VVertexGen(arg_dbname) 
+{
+    SetSeed();
+}
+
+void LSCEventGen::SetSeed(long seed)
 {
     if (seed < 0) {
         struct timeval tv; 
@@ -26,7 +36,7 @@ void LSCEventGen::Print_HEPEvt()
 
     int print_pol = 0;
 
-    if (_evt[0].PLX == 0 && _evt[i].PLY == 0 && _evt[0].PLZ == 0) 
+    if (_evt[0].PLX == 0 && _evt[0].PLY == 0 && _evt[0].PLZ == 0) 
         print_pol = 0;
     else
         print_pol = 1;
@@ -57,4 +67,33 @@ void LSCEventGen::Print_HEPEvt()
 
     return;
 }
+
+void LSCEventGen::ReadGeometryFile(G4String fn)
+{
+    _fn_geometry = fn;
+    _geom_db.ReadFile(_fn_geometry);
+
+}
+
+void LSCEventGen::GeneratePosition()
+{
+    double targetR = _geom_db["target_radius"];
+    double targetH = _geom_db["target_height"];
+    double targetT = _geom_db["target_thickness"];
+
+    targetR *= 10; // cm -> mm
+    targetH *= 10; // cm -> mm
+    targetT *= 10; // cm -> mm
+
+    double LS_R = targetR - targetT;
+    double LS_Hmin = -(targetH/2 - targetT);
+    double LS_Hmax = targetH/2 - targetT;
+
+    double rho_det = sqrt(G4UniformRand()) * LS_R;
+    double phi_det = G4UniformRand() * 2 * pi;
+    double z_det = G4UniformRand() * (LS_Hmax - LS_Hmin) + LS_Hmin;
+
+    _pos.setRhoPhiZ(rho_det, phi_det, z_det);
+}
+
 

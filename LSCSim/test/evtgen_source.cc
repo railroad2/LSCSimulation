@@ -11,7 +11,10 @@ int doit()
     double Ev = 2.0;
     double theta = -1;
     G4ThreeVector uv(1, 0, 0);
-    
+    G4String fn_geom = "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/geometry.dat";
+
+    evtgen->ReadGeometryFile(fn_geom);
+    evtgen->GeneratePosition();
     evtgen->GenerateEvent(Ev, uv, theta); 
     evtgen->SetFormat_HEPEvt();
     evtgen->Print_HEPEvt();

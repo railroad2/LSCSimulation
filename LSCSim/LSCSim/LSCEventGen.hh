@@ -10,6 +10,7 @@
 #include "Randomize.hh"
 
 #include "GLG4Sim/GLG4VertexGen.hh"
+#include "GLG4Sim/GLG4param.hh"
 
 typedef struct _Form_HEPEvt {
     int     ISTHEP; // status code
@@ -33,44 +34,58 @@ typedef struct _Form_HEPEvt {
 class LSCEventGen : public GLG4VVertexGen 
 {
 public:
-    LSCEventGen(const char * arg_dbname) : GLG4VVertexGen(arg_dbname) {}
+    LSCEventGen(const char * arg_dbname=""); 
     ~LSCEventGen() {}
     
     virtual void GeneratePrimaryVertex(G4Event * argEvent) = 0;
     virtual void SetState(G4String newValues) = 0;
     virtual G4String GetState() = 0;
 
+    void GeneratePosition();
     void Print_HEPEvt();
 
     // set functions
-    void SetSeed(long seed);
+    void SetSeed(long seed=-1);
+    void ReadGeometryFile(G4String fn);
 
     // get functions
     long GetSeed() const { return _rseed; }
+    G4ThreeVector GetPosition() const { return _pos; }
+     
+
+protected:
     std::vector<Form_HEPEvt> _evt;
+    G4ThreeVector _pos;
+    G4String _fn_geometry;
 
 private:
     long _rseed = 42;
+    GLG4param& _geom_db = GLG4param::GetDB();
 };
 
 
 class LSCEventGen_IBD : public LSCEventGen 
 {
 public:
-    LSCEventGen_IBD(const char * arg_dbname);
+    LSCEventGen_IBD(const char * arg_dbname="");
     ~LSCEventGen_IBD() {}
 
     virtual void GeneratePrimaryVertex(G4Event * argEvent);
     virtual void SetState(G4String newValues) {}
     virtual G4String GetState() { return ""; }
 
-    void GenerateEvent(double Ev, G4ThreeVector uv, double theta);
+    void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
     void SetFormat_HEPEvt();
 
     double GetEe1(double T, double theta);
+    double GetDifCrossSection(double E, double theta);
+    double GetDifCrossSection_costheta(double E, double costheta);
+    
+    void SetPDF(double E);
     
 private:
-    G4ThreeVector _pos;
+    double _PDF[721];
+
     G4LorentzVector _pv0;  // momentum of the incoming neutrino
     G4LorentzVector _pp0;  // proton
     G4LorentzVector _pe1;  // positron
@@ -81,14 +96,14 @@ private:
 class LSCEventGen_ve : public LSCEventGen 
 {
 public:
-    LSCEventGen_ve(const char * arg_dbname);
+    LSCEventGen_ve(const char * arg_dbname="");
     ~LSCEventGen_ve() {}
 
     virtual void GeneratePrimaryVertex(G4Event * argEvent);
     virtual void SetState(G4String newValues) {}
     virtual G4String GetState() { return ""; }
 
-    void GenerateEvent(double Ev, G4ThreeVector uv, double theta);
+    void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
     void SetFormat_HEPEvt();
 
     double GetEe1(double T, double theta);
@@ -98,10 +113,13 @@ public:
     double GetDifCrossSection_T(double E, double T, G4String vflavour);
     double GetDifCrossSection_costheta(double E, double costheta, G4String vflavour);
 
+    void SetPDF(double E, G4String vflavour);
 
 private:
+    double _PDF[721];
+
     G4String _vflavour;
-    G4ThreeVector _pos;
+
     G4LorentzVector _pv0; // momentum of the incoming neutrino
     G4LorentzVector _pe0; // initial electron
     G4LorentzVector _pv1; // neutrino

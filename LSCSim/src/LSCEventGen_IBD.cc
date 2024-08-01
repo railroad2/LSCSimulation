@@ -17,9 +17,6 @@
 
 using namespace std;
 
-double GetDifCrossSection(double E, double theta);
-double GetDifCrossSection_costheta(double E, double theta); 
-
 LSCEventGen_IBD::LSCEventGen_IBD(const char *arg_dbname)
     : LSCEventGen(arg_dbname)
 {
@@ -35,7 +32,7 @@ void LSCEventGen_IBD::GeneratePrimaryVertex(G4Event * argEvent)
 { return; }
 
 
-void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1) 
+void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta) 
 {
     double phi = -1;
 
@@ -44,8 +41,11 @@ void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1
     _pv0.set(uv0*Ev, Ev);
     _pp0.set(0, 0, 0, Mp);
 
+
     if (theta == -1) {
-        theta = G4UniformRand() * pi; 
+        SetPDF(Ev);
+        G4RandGeneral rngtheta(_PDF, 721);
+        theta = rngtheta() * pi;
     }
 
     if (phi == -1) {
@@ -59,23 +59,25 @@ void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1
     _pe1.setE(Ee1);
     _pe1.rotateUz(uv0);
     _pn1 = _pv0 + _pp0 - _pe1;
+
+    _pn1.setE(sqrt(_pn1.vect() * _pn1.vect() + Mn * Mn));
             
 #if DEBUG > 1
     cerr << "#DEBUG: Positron momentum calculation" << endl;
-    cerr << "#DEBUG:  theta\t" << theta << endl;
-    cerr << "#DEBUG:  phi\t"   << phi << endl;
-    cerr << "#DEBUG:  pe1\t"   << pe1 << endl;
-    cerr << "#DEBUG:  Ee1\t"   << Ee1 << endl;
-    cerr << "#DEBUG:  _pe1\t"   << _pe1 << endl;
+    cerr << "#DEBUG:   theta\t" << theta << endl;
+    cerr << "#DEBUG:     phi\t" << phi << endl;
+    cerr << "#DEBUG:     pe1\t" << pe1 << endl;
+    cerr << "#DEBUG:     Ee1\t" << Ee1 << endl;
+    cerr << "#DEBUG:    _pe1\t" << _pe1 << endl;
 #endif
 
 #if DEBUG 
     cerr << "#DEBUG: Four momentum vectors" << endl;
-    cerr << "#DEBUG:  _pv0\t" << _pv0 << endl;
-    cerr << "#DEBUG:  _pp0\t" << _pp0 << endl;
-    cerr << "#DEBUG:  _pe0\t" << _pe1 << endl;
-    cerr << "#DEBUG:  _pn0\t" << _pn1 << endl;
-    cerr << "#DEBUG:  total\t" << _pn1 + _pe1 - _pv0 - _pp0 << endl;
+    cerr << "#DEBUG:    _pv0\t" << _pv0 << endl;
+    cerr << "#DEBUG:    _pp0\t" << _pp0 << endl;
+    cerr << "#DEBUG:    _pe1\t" << _pe1 << endl;
+    cerr << "#DEBUG:    _pn1\t" << _pn1 << endl;
+    cerr << "#DEBUG:   total\t" << _pn1 + _pe1 - _pv0 - _pp0 << endl;
 #endif
 
     return;
@@ -85,29 +87,36 @@ void LSCEventGen_IBD::SetFormat_HEPEvt()
 {
     // neutrino
     Form_HEPEvt tmp;
+    vector<Form_HEPEvt> evt;
+    double to_GeV = 1e-3;
 
     tmp = {0, -12, 0, 0, 
-           _pv0.x()*1e-3, _pv0.y()*1e-3, _pv0.z()*1e-3, _pv0.t()*1e-3,  // momentum in GeV
-           0,                          // dt in ns
+           _pv0.x()*to_GeV, _pv0.y()*to_GeV, _pv0.z()*to_GeV, // momentum in GeV
+           _pv0.m()*to_GeV,               // mass in GeV
+           0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
-           0, 0, 0};                   // polarization
-    _evt.push_back(tmp); 
+           0, 0, 0};                      // polarization
+    evt.push_back(tmp); 
 
     // _positron
     tmp = {0, -11, 0, 0, 
-           _pe1.x()*1e-3, _pe1.y()*1e-3, _pe1.z()*1e-3, _pe1.t()*1e-3,  // momentum in GeV
-           0,                          // dt in ns
+           _pe1.x()*to_GeV, _pe1.y()*to_GeV, _pe1.z()*to_GeV, //momentum in GeV
+           _pe1.m()*to_GeV,               // mass in GeV
+           0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
-           0, 0, 0};                   // polarization
-    _evt.push_back(tmp);
+           0, 0, 0};                      // polarization
+    evt.push_back(tmp);
 
     // neutron
     tmp = {0, 2112, 0, 0, 
-           _pn1.x()*1e-3, _pn1.y()*1e-3, _pn1.z()*1e-3, _pn1.t()*1e-3,  // momentum in GeV
-           0,                          // dt in ns
+           _pn1.x()*to_GeV, _pn1.y()*to_GeV, _pn1.z()*to_GeV, //momentum in GeV
+           _pn1.m()*to_GeV,               // mass in GeV
+           0,                             // dt in ns
            _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
-           0, 0, 0};                   // polarization
-    _evt.push_back(tmp);
+           0, 0, 0};                      // polarization
+    evt.push_back(tmp);
+
+    _evt = evt;
 }
 
 
@@ -135,12 +144,12 @@ double LSCEventGen_IBD::GetEe1(double E, double theta)
 }
 
 
-double GetDifCrossSection(double E, double theta)
+double LSCEventGen_IBD::GetDifCrossSection(double E, double theta)
 {
     return GetDifCrossSection_costheta(E, cos(theta));
 }
 
-double GetDifCrossSection_costheta(double E, double costheta)
+double LSCEventGen_IBD::GetDifCrossSection_costheta(double E, double costheta)
 {
     /*-----------------------------------------------------------------
     Computes differential cross section 
@@ -190,5 +199,16 @@ double GetDifCrossSection_costheta(double E, double costheta)
     dsig *= sig_0 / 2;
 
     return dsig;
+}
+
+void LSCEventGen_IBD::SetPDF(double E)
+{
+    double theta = 0;
+    double dtheta = pi / 720;
+
+    for (int i=0; i<721; i++) {
+        theta = i * dtheta; 
+        _PDF[i] = GetDifCrossSection(E, theta)*1e45;
+    }
 }
 

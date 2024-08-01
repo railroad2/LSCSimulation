@@ -13,9 +13,15 @@ int doit()
     double theta = -1;
     G4ThreeVector uv(0, 0, 1);
     
+    G4String fn_geom = "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/geometry.dat";
+    evtgen->ReadGeometryFile(fn_geom);
+
+    evtgen->GeneratePosition();
     evtgen->GenerateEvent(Ev, uv, theta); 
     evtgen->SetFormat_HEPEvt();
     evtgen->Print_HEPEvt();
+
+    delete (evtgen);
 
     return 0;
 }
@@ -40,9 +46,7 @@ int test_dilog()
 
 int main(int argc, char** argv)
 {
-    for (int i=0; i<10; i++) {
-        doit(); 
-    }
+    doit(); 
     //test_dilog();
 
     return 0;
