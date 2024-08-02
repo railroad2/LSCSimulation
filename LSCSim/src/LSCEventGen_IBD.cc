@@ -90,7 +90,7 @@ void LSCEventGen_IBD::SetForm_HEPEvt()
     vector<Form_HEPEvt> evt;
     double to_GeV = 1e-3;
 
-    tmp = {0, -12, 0, 0, 
+    tmp = {1, -12, 0, 0, 
            _pv0.x()*to_GeV, _pv0.y()*to_GeV, _pv0.z()*to_GeV, // momentum in GeV
            _pv0.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
@@ -99,7 +99,7 @@ void LSCEventGen_IBD::SetForm_HEPEvt()
     evt.push_back(tmp); 
 
     // _positron
-    tmp = {0, -11, 0, 0, 
+    tmp = {1, -11, 0, 0, 
            _pe1.x()*to_GeV, _pe1.y()*to_GeV, _pe1.z()*to_GeV, //momentum in GeV
            _pe1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
@@ -108,7 +108,7 @@ void LSCEventGen_IBD::SetForm_HEPEvt()
     evt.push_back(tmp);
 
     // neutron
-    tmp = {0, 2112, 0, 0, 
+    tmp = {1, 2112, 0, 0, 
            _pn1.x()*to_GeV, _pn1.y()*to_GeV, _pn1.z()*to_GeV, //momentum in GeV
            _pn1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns

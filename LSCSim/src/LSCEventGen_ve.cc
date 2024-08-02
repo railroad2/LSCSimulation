@@ -95,7 +95,7 @@ void LSCEventGen_ve::SetForm_HEPEvt()
     double to_GeV = 1e-3;
 
     // incoming neutrino
-    tmp = {0, IDv, 0, 0, 
+    tmp = {1, IDv, 0, 0, 
            _pv0.x()*to_GeV, _pv0.y()*to_GeV, _pv0.z()*to_GeV, // momentum in GeV
            _pv0.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
@@ -104,7 +104,7 @@ void LSCEventGen_ve::SetForm_HEPEvt()
     evt.push_back(tmp); 
 
     // electron
-    tmp = {0, IDe, 0, 0, 
+    tmp = {1, IDe, 0, 0, 
            _pe1.x()*to_GeV, _pe1.y()*to_GeV, _pe1.z()*to_GeV, // momentum in GeV
            _pe1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
@@ -113,7 +113,7 @@ void LSCEventGen_ve::SetForm_HEPEvt()
     evt.push_back(tmp);
 
     // neutrino
-    tmp = {0, IDv, 0, 0, 
+    tmp = {1, IDv, 0, 0, 
            _pv1.x()*to_GeV, _pv1.y()*to_GeV, _pv1.z()*to_GeV, // momentum in GeV
            _pv1.m()*to_GeV,               // mass in GeV
            0,                             // dt in ns
