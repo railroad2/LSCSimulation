@@ -91,7 +91,7 @@ void LSCEventGen::GeneratePosition()
     double LS_Hmin = -(targetH/2 - targetT);
     double LS_Hmax = targetH/2 - targetT;
 
-    double rho_det = pow(G4UniformRand(), 2) * LS_R;
+    double rho_det = G4UniformRand()**2 * LS_R;
     double phi_det = G4UniformRand() * 2 * pi;
     double z_det = G4UniformRand() * (LS_Hmax - LS_Hmin) + LS_Hmin;
 
