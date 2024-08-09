@@ -1,0 +1,18 @@
+#
+# all dimension should be in "cm"
+# angle in "deg"
+#
+
+# source type
+# srctype         radioactive
+
+# source position
+sourcex          1000
+sourcey             0
+sourcez             0
+
+# energy range
+emin                1.8
+emax               10
+
+

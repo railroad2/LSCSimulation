@@ -35,7 +35,12 @@ void LSCEventGen_ve::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
 {
     double phi = -1;
 
-    G4ThreeVector uv0 = uv / sqrt(uv.dot(uv)); // normalize
+    double norm = sqrt(uv.dot(uv));
+    G4ThreeVector uv0 = uv;
+
+    if (norm > 0) {
+        uv0 = uv / norm;
+    }
 
     _pv0.set(uv0*Ev, Ev);
     _pe0.set(0, 0, 0, Me);

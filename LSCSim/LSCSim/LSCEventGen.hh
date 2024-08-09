@@ -42,6 +42,7 @@ public:
     virtual G4String GetState() = 0;
 
     void GeneratePosition();
+    G4ThreeVector GeneratePosition_cylinder(double R, double H);
     virtual void SetForm_HEPEvt() = 0;
     void Print_HEPEvt();
 
@@ -57,6 +58,7 @@ public:
 protected:
     std::vector<Form_HEPEvt> _evt;
     G4ThreeVector _pos;
+    G4ThreeVector _pos_source;
     G4String _fn_geometry;
 
 private:

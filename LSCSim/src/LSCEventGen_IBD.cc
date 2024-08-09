@@ -32,11 +32,21 @@ void LSCEventGen_IBD::GeneratePrimaryVertex(G4Event * argEvent)
 { return; }
 
 
-void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta) 
+void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
 {
     double phi = -1;
 
-    G4ThreeVector uv0 = uv / sqrt(uv.dot(uv)); // normalize
+    G4ThreeVector uv0 = uv; // normalize
+    double norm = sqrt(uv.dot(uv));
+
+    if (norm > 0) {
+        uv0 /= norm;
+    }
+    else {
+        uv0 = _pos - _pos_source;
+        norm = sqrt(uv0.dot(uv0));
+        uv0 /= norm;
+    }    
 
     _pv0.set(uv0*Ev, Ev);
     _pp0.set(0, 0, 0, Mp);

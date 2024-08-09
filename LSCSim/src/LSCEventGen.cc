@@ -14,6 +14,8 @@ LSCEventGen::LSCEventGen(const char * arg_dbname)
     : GLG4VVertexGen(arg_dbname) 
 {
     SetSeed();
+    _pos = G4ThreeVector(0, 0, 0);
+    _pos_source = G4ThreeVector(0, 0, 0);
 }
 
 void LSCEventGen::SetSeed(long seed)
@@ -96,6 +98,24 @@ void LSCEventGen::GeneratePosition()
     double z_det = G4UniformRand() * (LS_Hmax - LS_Hmin) + LS_Hmin;
 
     _pos.setRhoPhiZ(rho_det, phi_det, z_det);
+}
+
+
+G4ThreeVector LSCEventGen::GeneratePosition_cylinder(double R, double H)
+{
+    double LS_R = R;
+    double LS_Hmin = -H/2;
+    double LS_Hmax = H/2;
+
+    double rho_det = sqrt(G4UniformRand()) * LS_R;
+    double phi_det = G4UniformRand() * 2 * pi;
+    double z_det = G4UniformRand() * (LS_Hmax - LS_Hmin) + LS_Hmin;
+
+    G4ThreeVector pos;
+    pos.setRhoPhiZ(rho_det, phi_det, z_det);
+    _pos = pos;
+
+    return pos;
 }
 
 
