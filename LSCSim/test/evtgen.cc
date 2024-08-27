@@ -6,11 +6,12 @@
 
 using namespace std;
 
-G4String fn_geom   = "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/geometry.dat";
-G4String fn_source = "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/source.dat";
-G4String fn_solar  = "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/solar.dat";
-G4String fn_reactor= "/home/kmlee/opt/lscsim/LSCSimulation/LSCSim/data/reactor.dat";
+G4String fn_geom   = "geometry.dat";
+G4String fn_source = "source.dat";
+G4String fn_solar  = "solar.dat";
+G4String fn_reactor= "reactor.dat";
 
+bool exists(const G4String &fname);
 int reactor(int nevent, double Ev);
 int source(int nevent, double Ev, bool flag_uniform_vtx=false);
 int solar(int nevent, double Ev);
@@ -38,12 +39,15 @@ int main(int argc, char** argv)
             case 'g': fn_geom = G4String(optarg); break;
             case 'e': Ev = atof(optarg); break;
             case 's': 
-                if (evt_type == "source")
+                if (evt_type == "source") {
                     fn_source = G4String(optarg);
-                else if (evt_type == "solar")
+                }
+                else if (evt_type == "solar") {
                     fn_solar = G4String(optarg);
-                else
+                }
+                else {
                     fn_reactor = G4String(optarg); 
+                }
                 break;
             case 'h': PrintHelp(); break;
             default: PrintHelp();
@@ -69,12 +73,20 @@ int reactor(int nevent, double Ev)
     G4ThreeVector uv(1, 0, 0); // direction of incoming neutrino
     G4ThreeVector pos_src;
     
+    if (!exists(fn_geom)) {
+        cout << "File does not exist: " << fn_geom<< endl;
+        return -1;
+    }
     evtgen->ReadGeometryFile(fn_geom);
 
     GLG4param& src_db = GLG4param::GetDB();
+    if (!exists(fn_reactor)) {
+        cout << "File does not exist: " << fn_reactor << endl;
+        return -1;
+    }
     src_db.ReadFile(fn_reactor);
 
-    pos_src = G4ThreeVector(src_db["px"], src_db["py"], src_db["pz"]);
+    pos_src = G4ThreeVector(src_db["x"], src_db["y"], src_db["z"]);
 
     double emin = src_db["emin_reactor"];
     double emax = src_db["emax_reactor"];
@@ -104,8 +116,16 @@ int source(int nevent, double Ev, bool flag_uniform_vtx)
     G4ThreeVector uv(1, 0, 0); 
     G4ThreeVector pos_src;
 
+    if (!exists(fn_geom)) {
+        cout << "File does not exist: " << fn_geom << endl;
+        return -1;
+    }
     evtgen->ReadGeometryFile(fn_geom);
 
+    if (!exists(fn_source)) {
+        cout << "File does not exist: " << fn_source << endl;
+        return -1;
+    }
     GLG4param& src_db = GLG4param::GetDB();
     src_db.ReadFile(fn_source);
 
@@ -152,15 +172,24 @@ int solar(int nevent, double Ev)
     G4ThreeVector uv(0, 0, 1);
     G4ThreeVector pos_src;
     
+
+    if (!exists(fn_geom)) {
+        cout << "File does not exist: " << fn_geom << endl;
+        return -1;
+    }
     evtgen->ReadGeometryFile(fn_geom);
 
+    if (!exists(fn_solar)) {
+        cout << "File does not exist: " << fn_solar << endl;
+        return -1;
+    }
     GLG4param& src_db = GLG4param::GetDB();
     src_db.ReadFile(fn_solar);
 
     double emin = src_db["emin_solar"];
     double emax = src_db["emax_solar"];
 
-    pos_src = G4ThreeVector(src_db["px"], src_db["py"], src_db["pz"]);
+    pos_src = G4ThreeVector(src_db["sunx"], src_db["suny"], src_db["sunz"]);
     pos_src *= 10; // cm -> mm;
     uv = pos_src / pos_src.mag();
 
@@ -187,3 +216,8 @@ void PrintHelp()
     cout << "       event type - reactor, source, solar " << endl;
 }
 
+bool exists(const G4String &fname)
+{
+    ifstream f(fname);
+    return f.good();
+}

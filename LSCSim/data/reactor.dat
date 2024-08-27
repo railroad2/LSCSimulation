@@ -9,6 +9,6 @@ y                  0
 z                  0 
 
 # energy range
-emin_solar         1.8
-emax_solar        10   
+emin_reactor       1.8
+emax_reactor      10   
 
