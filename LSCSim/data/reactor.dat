@@ -1,0 +1,14 @@
+#
+# all dimension should be in "cm"
+# angle in "deg"
+#
+
+# direction of the reactor
+x                  1 
+y                  0
+z                  0 
+
+# energy range
+emin_solar         1.8
+emax_solar        10   
+

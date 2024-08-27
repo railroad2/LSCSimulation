@@ -1,0 +1,14 @@
+#
+# all dimension should be in "cm"
+# angle in "deg"
+#
+
+# direction of the sun
+sunx                  0 
+suny                  0
+sunz                  1
+
+# energy range
+emin_solar            0.01 
+emax_solar           20
+

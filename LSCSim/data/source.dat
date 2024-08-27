@@ -3,16 +3,12 @@
 # angle in "deg"
 #
 
-# source type
-# srctype         radioactive
-
-# source position
+# radioactive source position
 sourcex          1000
 sourcey             0
 sourcez             0
 
 # energy range
-emin                1.8
-emax               10
-
+emin_source         1.8
+emax_source        10
 

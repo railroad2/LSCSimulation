@@ -222,3 +222,67 @@ void LSCEventGen_IBD::SetPDF(double E)
     }
 }
 
+int LSCEventGen_IBD::GeneratePosition_sourceMC(double L)
+{
+    double Lmin = GetLmin();
+
+    double L1 = L - Lmin;
+    
+    double factor = Lmin * Lmin / L / L;
+
+#if DEBUG > 2
+    cerr << "Lmin " << Lmin << endl;
+    cerr << "L " << L << endl;
+    cerr << "factor "  << factor << endl;
+#endif
+
+    if (G4UniformRand() < factor) 
+        return 1;
+    else 
+        return 0;
+}
+
+double LSCEventGen_IBD::GetLmin()
+{
+    double Lmin = 0;
+    double targetR = _geom_db["target_radius"];
+    double targetH = _geom_db["target_height"];
+    double targetT = _geom_db["target_thickness"];
+
+    targetR *= 10;
+    targetH *= 10;
+    targetT *= 10;
+
+    double LS_R = targetR - targetT;
+    double LS_Hmin = -(targetH/2 - targetT);
+    double LS_Hmax = targetH/2 - targetT;
+
+    G4ThreeVector pos_src = GetPositionSource();
+
+    double src_R = sqrt(pow(pos_src.x(), 2) + pow(pos_src.y(), 2));
+    double src_Z = pos_src.z();
+
+#if DEBUG > 2
+    cerr << "src_R = " << src_R << endl;
+    cerr << "src_Z = " << src_Z << endl;
+#endif
+
+    if (src_R > LS_R) {
+        if (src_Z >= LS_Hmin && src_Z <= LS_Hmax)
+            Lmin = src_R - LS_R;
+        else if(src_Z < LS_Hmin) 
+            Lmin = sqrt(pow(src_R - LS_R, 2) + pow(src_Z - LS_Hmin, 2));
+        else if(src_Z > LS_Hmax) 
+            Lmin = sqrt(pow(src_R - LS_R, 2) + pow(LS_Hmax - src_Z, 2));
+    }
+    else {
+        if (src_Z >= LS_Hmin && src_Z <= LS_Hmax)
+            Lmin = 0;
+        else if(src_Z < LS_Hmin) 
+            Lmin = sqrt(pow(src_Z - LS_Hmin, 2));
+        else if(src_Z > LS_Hmax) 
+            Lmin = sqrt(pow(LS_Hmax - src_Z, 2));
+    }
+
+    return Lmin; 
+}

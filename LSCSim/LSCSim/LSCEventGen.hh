@@ -46,13 +46,16 @@ public:
     virtual void SetForm_HEPEvt() = 0;
     void Print_HEPEvt();
 
+    void ReadGeometryFile(G4String fn);
+
     // set functions
     void SetSeed(long seed=-1);
-    void ReadGeometryFile(G4String fn);
+    void SetPositionSource(G4ThreeVector pos) { _pos_source = pos; }
 
     // get functions
     long GetSeed() const { return _rseed; }
     G4ThreeVector GetPosition() const { return _pos; }
+    G4ThreeVector GetPositionSource() const { return _pos_source; }
      
 
 protected:
@@ -60,10 +63,10 @@ protected:
     G4ThreeVector _pos;
     G4ThreeVector _pos_source;
     G4String _fn_geometry;
+    GLG4param& _geom_db = GLG4param::GetDB();
 
 private:
     long _rseed = 42;
-    GLG4param& _geom_db = GLG4param::GetDB();
 };
 
 
@@ -85,6 +88,8 @@ public:
     double GetDifCrossSection_costheta(double E, double costheta);
     
     void SetPDF(double E);
+    int GeneratePosition_sourceMC(double L);
+    double GetLmin();
     
 private:
     double _PDF[721];
