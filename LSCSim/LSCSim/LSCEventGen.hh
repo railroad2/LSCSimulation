@@ -56,7 +56,9 @@ public:
     long GetSeed() const { return _rseed; }
     G4ThreeVector GetPosition() const { return _pos; }
     G4ThreeVector GetPositionSource() const { return _pos_source; }
-     
+
+    int GeneratePosition_sourceMC(double L);
+    double GetLmin();
 
 protected:
     std::vector<Form_HEPEvt> _evt;
@@ -88,8 +90,6 @@ public:
     double GetDifCrossSection_costheta(double E, double costheta);
     
     void SetPDF(double E);
-    int GeneratePosition_sourceMC(double L);
-    double GetLmin();
     
 private:
     double _PDF[721];

@@ -47,6 +47,7 @@ int main(int argc, char ** argv)
 
   int nevent = 1;
   int doVis = 0;
+  int doInt = 0;
 
   G4String outputFileName;
   G4String macroFileName;
@@ -55,8 +56,13 @@ int main(int argc, char ** argv)
   G4String geometryData;
   G4String pmtposData;
 
-  while ((opt = getopt(argc, argv, "o:f:m:g:p:n:v:h")) != -1) {
+  while ((opt = getopt(argc, argv, "I:o:f:m:g:p:n:v:h")) != -1) {
     switch (opt) {
+      case 'I': {
+        doInt = 1; 
+        doVis = 1;
+        break;
+      }
       case 'o': outputFileName = G4String(optarg); break;
       case 'f': macroFileName = G4String(optarg); break;
       case 'm': materialData = G4String(optarg); break;
@@ -104,11 +110,13 @@ int main(int argc, char ** argv)
   LSCRootManager * rootManager = new LSCRootManager();
   rootManager->SetRootFile(outputFileName.data());
 
+  G4cout << "Setting GLG4PrimaryGeneratorAction" << G4endl;
   runManager->SetUserAction(new GLG4PrimaryGeneratorAction);
   runManager->SetUserAction(new LSCRunAction(rootManager));
   runManager->SetUserAction(new LSCEventAction(rootManager));
   runManager->SetUserAction(new LSCTrackingAction(rootManager));
   runManager->SetUserAction(new LSCSteppingAction(rootManager));
+
 
   G4VisManager * visManager = NULL;
   if (doVis) {
@@ -122,9 +130,19 @@ int main(int argc, char ** argv)
   G4String command = Form("/control/execute %s", macroFileName.c_str());
   UImanager->ApplyCommand(command);
 
+  
   if (!doVis) {
-    command = Form("/run/beamOn %d", nevent);
-    UImanager->ApplyCommand(command);
+    //command = Form("/run/beamOn %d", nevent);
+    //UImanager->ApplyCommand(command);
+
+    G4UIsession * theSession = new G4UIterminal(new G4UItcsh);
+    theSession->SessionStart();
+  }
+  else if (doInt) {
+    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
+    UImanager->ApplyCommand("/control/execute mac/init_vis.mac");  
+    ui->SessionStart();
+    delete ui;
   }
   else {
     command = Form("/control/execute %s", vis_macroFileName.c_str());

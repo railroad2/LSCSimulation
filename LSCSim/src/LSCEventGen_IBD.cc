@@ -222,7 +222,7 @@ void LSCEventGen_IBD::SetPDF(double E)
     }
 }
 
-int LSCEventGen_IBD::GeneratePosition_sourceMC(double L)
+int LSCEventGen::GeneratePosition_sourceMC(double L)
 {
     double Lmin = GetLmin();
 
@@ -242,7 +242,7 @@ int LSCEventGen_IBD::GeneratePosition_sourceMC(double L)
         return 0;
 }
 
-double LSCEventGen_IBD::GetLmin()
+double LSCEventGen::GetLmin()
 {
     double Lmin = 0;
     double targetR = _geom_db["target_radius"];

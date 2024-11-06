@@ -14,6 +14,7 @@ G4String fn_reactor= "reactor.dat";
 bool exists(const G4String &fname);
 int reactor(int nevent, double Ev);
 int source(int nevent, double Ev, bool flag_uniform_vtx=false);
+int source_Cr51(int nevent, double Ev, bool flag_uniform_vtx=false);
 int solar(int nevent, double Ev);
 void PrintHelp();
 
@@ -45,6 +46,9 @@ int main(int argc, char** argv)
                 else if (evt_type == "solar") {
                     fn_solar = G4String(optarg);
                 }
+                else if (evt_type == "Cr51") {
+                    fn_source = G4String(optarg);
+                }
                 else {
                     fn_reactor = G4String(optarg); 
                 }
@@ -57,6 +61,7 @@ int main(int argc, char** argv)
     if      (evt_type == "reactor") reactor(nevent, Ev);
     else if (evt_type == "source")  source (nevent, Ev);
     else if (evt_type == "solar")   solar  (nevent, Ev);
+    else if (evt_type == "Cr51")    source_Cr51(nevent, Ev);
     else PrintHelp();
 
     return 0;
@@ -207,13 +212,81 @@ int solar(int nevent, double Ev)
 }
 
 
+int source_Cr51(int nevent, double Ev, bool flag_uniform_vtx)
+{
+    LSCEventGen_ve* evtgen = new LSCEventGen_ve();
+
+    bool rndEv = false;
+    if (Ev == -1) rndEv = true;
+
+    double theta = -1;
+    G4ThreeVector uv(1, 0, 0); 
+    G4ThreeVector pos_src;
+
+    if (!exists(fn_geom)) {
+        cout << "File does not exist: " << fn_geom << endl;
+        return -1;
+    }
+    evtgen->ReadGeometryFile(fn_geom);
+
+    if (!exists(fn_source)) {
+        cout << "File does not exist: " << fn_source << endl;
+        return -1;
+    }
+    GLG4param& src_db = GLG4param::GetDB();
+    src_db.ReadFile(fn_source);
+
+    double Evs[4] = {0.747, 0.752, 0.427, 0.432}; // MeV
+    double BRs[4] = {0.816, 0.085, 0.090, 0.009};
+    double L;
+    double N;
+    int flagMC = 1;
+
+    pos_src = G4ThreeVector(src_db["sourcex"], src_db["sourcey"], src_db["sourcez"]);
+    pos_src *= 10; // cm -> mm;
+    evtgen->SetPositionSource(pos_src);
+
+    for (int i=0; i<nevent; i++) {
+        flagMC = 0;
+        if (rndEv) {
+            N = G4UniformRand();
+
+            if (N >= 0.0 && N <= BRs[0])
+                Ev = 0.747; 
+            else if (N <= BRs[0]+BRs[1]) 
+                Ev = 0.752; 
+            else if (N <= BRs[0]+BRs[1]+BRs[2]) 
+                Ev = 0.427; 
+            else 
+                Ev = 0.432;
+        }
+
+        while (!flagMC) {
+            evtgen->GeneratePosition();
+            uv = evtgen->GetPosition() - pos_src;
+            L = sqrt(uv.dot(uv));
+
+            if (flag_uniform_vtx)
+                flagMC = 1;
+            else
+                flagMC = evtgen->GeneratePosition_sourceMC(L);
+        }
+
+        evtgen->GenerateEvent(Ev, uv, theta); 
+        evtgen->Print_HEPEvt();
+    }
+
+    return 0;
+}
+
+
 void PrintHelp()
 {
     cout << endl;
     cout << "Usage: evtgen [-t event type] [-n # of event] [-g geometryfile]" << endl;
     cout << "              [-e neutrino energy] [-s sourcefile]" << endl;
     //cout << "              [-e neutrino energy] <setting file>" << endl;
-    cout << "       event type - reactor, source, solar " << endl;
+    cout << "       event type - reactor, source, solar, Cr51 " << endl;
 }
 
 bool exists(const G4String &fname)
