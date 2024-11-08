@@ -225,6 +225,10 @@ void LSCEventGen_IBD::SetPDF(double E)
 int LSCEventGen::GeneratePosition_sourceMC(double L)
 {
     double Lmin = GetLmin();
+    
+    if (Lmin < 100) {
+        Lmin = 100;
+    }
 
     double L1 = L - Lmin;
     
