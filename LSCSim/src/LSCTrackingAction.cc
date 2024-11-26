@@ -21,7 +21,11 @@ void LSCTrackingAction::PreUserTrackingAction(const G4Track * aTrack)
   // This user track information is only relevant to the photons
   fpTrackingManager->SetUserTrackInformation(new LSCUserTrackInformation);
 
-  if (fRecorder) fRecorder->RecordTrack(aTrack);
+  //JW added
+  if (aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) {
+    return;
+  }
+  else if (fRecorder) fRecorder->RecordTrack(aTrack);
 }
 
 void LSCTrackingAction::PostUserTrackingAction(const G4Track * aTrack)
