@@ -36,6 +36,7 @@ private:
   void ConstructMaterials();
   G4VPhysicalVolume * ConstructDetector();
   void ConstructDetector_LSC(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
+  void ConstructDetector_LSC_sphere(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
   void ConstructDetector_Prototype(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
 
   
