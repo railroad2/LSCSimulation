@@ -154,10 +154,10 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
 
   //auto TargetTankTubs =
   //    new G4Tubs("TargetTankTubs", 0, targetR, targetH / 2, 0, 360 * deg);
-  auto TargetTankSphere =
-      new G4Sphere("TargetTankSphere", 0, targetR, 0, 360 * deg, 0, 180 * deg);
+  auto TargetTankTubs =
+      new G4Sphere("TargetTankTubs", 0, targetR, 0, 360 * deg, 0, 180 * deg);
   auto TargetTankLog =
-      new G4LogicalVolume(TargetTankSphere, G4Material::GetMaterial("Acrylic"),
+      new G4LogicalVolume(TargetTankTubs, G4Material::GetMaterial("Acrylic"),
                           "TargetTankLog", 0, 0, 0);
   // TargetTankLog->SetVisAttributes(G4VisAttributes::GetInvisible());
   TargetTankLog->SetVisAttributes(G4Colour(1, 1, 1, 0.1)); // white
@@ -167,10 +167,10 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
 
   //auto TargetLSTubs = new G4Tubs("TargetLSTubs", 0, targetR - targetT,
   //                               targetH / 2 - targetT, 0, 360 * deg);
-  auto TargetLSSphere = new G4Sphere("TargetLSSphere", 0, targetR - targetT,
+  auto TargetLSTubs = new G4Sphere("TargetLSTubs", 0, targetR - targetT,
                                  0, 360 * deg, 0, 180 * deg);
   auto TargetLSLog = new G4LogicalVolume(
-      TargetLSSphere, G4Material::GetMaterial("LS_LAB"), "TargetLSLog", 0, 0, 0);
+      TargetLSTubs, G4Material::GetMaterial("LS_LAB"), "TargetLSLog", 0, 0, 0);
   // TargetLSLog->SetVisAttributes(G4VisAttributes::GetInvisible());
   TargetLSLog->SetVisAttributes(G4Colour(0, 1, 0, 0.1)); // green
   auto TargetLSPhys =
@@ -181,8 +181,8 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
   ///////////////////////////////////////////////////////////////////////////
   // --- make the fundamental inner  PMT assembly
   ///////////////////////////////////////////////////////////////////////////
-  /*
-  auto _logiInnerPMT20 = new LSC_20inch_LogicalVolume(
+  //auto _logiInnerPMT20 = new LSC_20inch_LogicalVolume(
+  auto _logiInnerPMT20 = new LSC_10inch_LogicalVolume(
       "InnerPMT", G4Material::GetMaterial("Water"),
       G4Material::GetMaterial("Glass"), Photocathode_opsurf,
       G4Material::GetMaterial("PMT_Vac"), G4Material::GetMaterial("Steel"),
@@ -226,7 +226,7 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
       angle_x = normal_angle;
     }
     else {
-      angle_x = 0;
+      //angle_x = 0;
     }
 
     auto PMT_rotation = new G4RotationMatrix();
@@ -238,5 +238,4 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT20,
                       BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
   }
-  */
 }

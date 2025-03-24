@@ -125,6 +125,8 @@ G4VPhysicalVolume * LSCDetectorConstruction::ConstructDetector()
 
   if (fWhichDetector == "LSC")
     ConstructDetector_LSC(WorldPhys, pmtSDInner, geom_db);
+  else if (fWhichDetector == "SPHERE")
+    ConstructDetector_LSC_sphere(WorldPhys, pmtSDInner, geom_db);
   else if (fWhichDetector == "PROTO")
     ConstructDetector_Prototype(WorldPhys, pmtSDInner, geom_db);
 
