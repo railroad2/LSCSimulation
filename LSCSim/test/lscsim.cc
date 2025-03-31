@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "G4RunManager.hh"
 #include "G4String.hh"

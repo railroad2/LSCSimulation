@@ -43,6 +43,7 @@ public:
 
     void GeneratePosition();
     G4ThreeVector GeneratePosition_cylinder(double R, double H);
+    G4ThreeVector GeneratePosition_sphere(double R);
     virtual void SetForm_HEPEvt() = 0;
     void Print_HEPEvt();
 
