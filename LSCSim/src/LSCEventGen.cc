@@ -122,9 +122,9 @@ G4ThreeVector LSCEventGen::GeneratePosition_cylinder(double R, double H)
 
 G4ThreeVector LSCEventGen::GeneratePosition_sphere(double R)
 {
-    double x = G4UniformRand() * R;
-    double y = G4UniformRand() * R;
-    double z = G4UniformRand() * R;
+    double x = G4UniformRand() * 2*R - R;
+    double y = G4UniformRand() * 2*R - R;
+    double z = G4UniformRand() * 2*R - R;
 
     if (R*R < x*x + y*y + z*z)
         return GeneratePosition_sphere(R);
