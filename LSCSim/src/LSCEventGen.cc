@@ -93,14 +93,12 @@ void LSCEventGen::GeneratePosition()
     double LS_Hmin = -(targetH/2 - targetT);
     double LS_Hmax = targetH/2 - targetT;
 
-    if (true) {
-        G4ThreeVector pos = GeneratePosition_cylinder(LS_R, LS_Hmax - LS_Hmin);
+    if (_det_shape == "cylinder") {
+        GeneratePosition_cylinder(LS_R, LS_Hmax - LS_Hmin);
     }
-    else if (false) {
-        G4ThreeVector pos = GeneratePosition_sphere(LS_R);
+    else if (_det_shape == "sphere") {
+        GeneratePosition_sphere(LS_R);
     }
-
-    return pos;
 }
 
 
