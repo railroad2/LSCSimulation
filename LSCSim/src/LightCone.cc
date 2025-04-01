@@ -1,0 +1,50 @@
+#include <fstream>
+#include <string>
+#include <vector>
+
+#include "LightCone.hh"
+
+LightCone::LightCone(G4String ifname)
+{
+    Construct_LightCone(ifname)
+}
+
+void LightCone::Construct_LightCone(G4String ifname) {
+    
+    //G4NistManager* nist = G4NistManager::Instance();
+    //G4Material* pmt_mat = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
+
+    ///////Lightcon///////////////
+    std::vector<G4double> r_vals, z_vals;
+    std::ifstream infile((string) ifname);
+    G4double x, z;
+
+    while (infile >> x >> z) {
+        r_vals.push_back(x * cm);
+        z_vals.push_back(z * cm);
+    }
+    infile.close();
+
+    size_t numZ = r_vals.size();
+    if (numZ < 2) {
+        G4Exception("DetectorConstruction::Construct()", "GeomSolids0003", FatalException, "Insufficient profile data.");
+    }
+   
+    std::vector<G4double> r_vals_inner(numZ);
+    std::vector<G4double> r_vals_outer(numZ);
+    G4double thickness = 1.0 * mm;
+
+    for (size_t i = 0; i < numZ; i++) {
+        r_vals_inner[i] = r_vals[i];
+        r_vals_outer[i] = r_vals[i] + thickness;
+    }
+
+    G4Polycone* solidConcentrator = new G4Polycone(
+        "Concentrator", 0.0 * deg, 360.0 * deg, numZ,
+        z_vals.data(), r_vals_inner.data(), r_vals_outer.data()
+    );
+   
+    G4LogicalVolume* logicConcentrator = new G4LogicalVolume(solidConcentrator, pmt_mat, "Concentrator");
+
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicConcentrator, "Concentrator", logicWorld, false, 0, true);
+}
