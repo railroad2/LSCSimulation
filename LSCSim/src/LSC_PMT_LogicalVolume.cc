@@ -17,6 +17,7 @@
 #include "G4VisAttributes.hh" // for G4VisAttributes::Invisible
 #include "GLG4Sim/GLG4TorusStack.hh"
 #include "LSCSim/LSCPMTOpticalModel.hh"
+#include "LSCSim/LightCon.hh"
 
 using namespace CLHEP;
 
@@ -313,6 +314,36 @@ LSC_10inch_LogicalVolume::LSC_10inch_LogicalVolume(
       DynodeMat,           // dynode stack metal
       detector             // detector hook
   );
+
+  if (fLightConcentrator) {
+    auto lc = new LightCon();
+    auto lc_log = lc->Construct_LightCon("profile1.txt");
+
+    auto lc_phys = new G4PVPlacement(0, 
+                      G4ThreeVector(0., 0., z_equator+40+3),
+                      lc_log,
+                      "lightcon_phys",
+                      this,
+                      false, 
+                      0);
+    /*
+    auto lc_phys = new G4PVPlacement(
+                      0, 
+                      G4ThreeVector(0., 0., z_equator+40+3),
+                      "lc_phys",
+                      lc_log,
+                      this,
+                      false, 
+                      0, false);
+    
+    
+    
+    new G4LogicalBorderSurface("lcsurf1", lc_phys,
+                             this, our_Mirror_opsurf);
+    new G4LogicalBorderSurface("lcsurf2", this,
+                             lc_phys, our_Mirror_opsurf);
+    */
+  }
 
   if (MaskMat != NULL) {
     // make the mask -- use thin cylindrical disk for now

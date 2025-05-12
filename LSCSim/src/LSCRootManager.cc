@@ -169,6 +169,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
 
   if (pmtHC) {
     G4int nPMT = pmtHC->entries();
+    G4cout << "nPMT: " << nPMT << endl;
 
     for (int i = 0; i < nPMT; i++) {
       const PMTHit * pmt = (*pmtHC)[i];
@@ -180,6 +181,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
       int npe = 0;
 
       int nph = pmt->GetNHit();
+      G4cout << "nph: " << nph << endl;
       if (fHitPhotonSave) {
         for (int j = 0; j < nph; j++) {
           MCPhotonHit * ph = pmt->GetHit(j);
@@ -250,7 +252,8 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
   G4Track * track = aStep->GetTrack();
   const G4ParticleDefinition * particleDef = track->GetParticleDefinition();
 
-  if (proc->GetProcessName() == "Scintillation") {
+  //if (proc->GetProcessName() == "Scintillation") {
+  if (proc->GetProcessName() == "Scintillation" || proc->GetProcessName() == "Cerenkov" ) {
     LSCScintillation * scintproc = (LSCScintillation *)proc;
     G4String volumeName = volume->GetName();
     if (G4StrUtil::contains(volumeName, "LSPhys")) {

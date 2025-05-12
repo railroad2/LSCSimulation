@@ -30,7 +30,7 @@ G4double GammaEnergies[15];
 void PrintHelp()
 {
   cout << endl;
-  cout << "Usage: LSCSim [-n # of event] [-o output] [-f macro]" << endl
+  cout << "Usage: lscsim [-n # of event] [-o output] [-f macro]" << endl
        << "              [-g geometry] [-p pmt_position data] [-m material] [-v macro]" << endl;
   cout << endl;
 

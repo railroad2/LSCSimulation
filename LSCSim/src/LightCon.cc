@@ -2,21 +2,24 @@
 #include <string>
 #include <vector>
 
-#include "LightCone.hh"
+#include "G4Tubs.hh"
+#include "G4Material.hh"
+#include "G4NistManager.hh"
+#include "G4Polycone.hh"
+#include "G4PVPlacement.hh"
+#include "G4SystemOfUnits.hh"
 
-LightCone::LightCone(G4String ifname)
-{
-    Construct_LightCone(ifname)
-}
+#include "LSCSim/LightCon.hh"
 
-void LightCone::Construct_LightCone(G4String ifname) {
+G4LogicalVolume* LightCon::Construct_LightCon(G4String ifname) {
     
-    //G4NistManager* nist = G4NistManager::Instance();
+    G4NistManager* nist = G4NistManager::Instance();
     //G4Material* pmt_mat = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
+    G4Material* pmt_mat = G4Material::GetMaterial("Steel");
 
     ///////Lightcon///////////////
     std::vector<G4double> r_vals, z_vals;
-    std::ifstream infile((string) ifname);
+    std::ifstream infile((G4String) ifname);
     G4double x, z;
 
     while (infile >> x >> z) {
@@ -46,5 +49,5 @@ void LightCone::Construct_LightCone(G4String ifname) {
    
     G4LogicalVolume* logicConcentrator = new G4LogicalVolume(solidConcentrator, pmt_mat, "Concentrator");
 
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicConcentrator, "Concentrator", logicWorld, false, 0, true);
+    return logicConcentrator;
 }

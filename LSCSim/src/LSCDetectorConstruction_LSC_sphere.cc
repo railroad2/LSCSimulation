@@ -181,6 +181,7 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
   ///////////////////////////////////////////////////////////////////////////
   // --- make the fundamental inner  PMT assembly
   ///////////////////////////////////////////////////////////////////////////
+
   //auto _logiInnerPMT20 = new LSC_20inch_LogicalVolume(
   auto _logiInnerPMT20 = new LSC_10inch_LogicalVolume(
       "InnerPMT", G4Material::GetMaterial("Water"),
@@ -195,6 +196,13 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     G4Exception("LSCDetectorConstruction::LSCDetectorConstruction", "",
                 FatalException, msg);
   }
+
+  //auto PMT_cylinder = new G4Tubs();
+  //auto PMT_log = new G4LogicalVolume(
+
+  //auto lc = new LightCon();
+  //auto lc_log = lc->Construct_LightCon("profile1.txt");
+  //lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
 
   char PMTname[64];
 
