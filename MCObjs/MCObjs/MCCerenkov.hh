@@ -42,25 +42,14 @@ private:
 };
 
 inline void MCCerenkov::SetVolumeId(int val) { fVolumeId = val; }
-
 inline void MCCerenkov::AddEnergyDeposit(float val) { fEdep += val; }
-
 inline void MCCerenkov::AddEnergyVisible(float val) { fEdepQuenched += val; }
-
 inline void MCCerenkov::AddCerenkovPhotons(int val) { fNCerenkovPhoton += val; }
-
 inline int MCCerenkov::GetVolumeId() const { return fVolumeId; }
-
 inline float MCCerenkov::GetEnergyDeposit() const { return fEdep; }
-
 inline float MCCerenkov::GetEnergyVisible() const { return fEdepQuenched; }
-
 inline int MCCerenkov::GetNCerenkovPhoton() const { return fNCerenkovPhoton; }
-
 inline int MCCerenkov::GetNStep() const { return GetEntriesFast(); }
-inline MCCerenkovStep * MCCerenkov::GetStep(int n) const
-{
-  return (MCCerenkovStep *)At(n);
-}
+inline MCCerenkovStep * MCCerenkov::GetStep(int n) const { return (MCCerenkovStep *)At(n); }
 
 #endif

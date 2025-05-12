@@ -1,33 +1,33 @@
-#ifndef MCCerenkovData_HH
-#define MCCerenkovData_HH
+#ifndef MCScintData_HH
+#define MCScintData_HH
 
 #include "TClonesArray.h"
 
-class MCCerenkov;
-class MCCerenkovData : public TClonesArray {
+class MCScint;
+class MCScintData : public TClonesArray {
 public:
-  MCCerenkovData();
-  MCCerenkovData(const MCCerenkovData & data);
-  virtual ~MCCerenkovData();
+  MCScintData();
+  MCScintData(const MCScintData & data);
+  virtual ~MCScintData();
 
   virtual void Clear(const Option_t * opt = "");
 
-  MCCerenkov * Add();
-  MCCerenkov * Add(int id);
+  MCScint * Add();
+  MCScint * Add(int id);
 
   int GetN() const;
-  MCCerenkov * Get(int i) const;
-  MCCerenkov * FindCerenkov(int id);
+  MCScint * Get(int i) const;
+  MCScint * FindScint(int id);
 
   virtual void Print(const Option_t * opt = "") const;
 
 private:
   int fN; //!
 
-  ClassDef(MCCerenkovData, 1)
+  ClassDef(MCScintData, 1)
 };
 
-inline int MCCerenkovData::GetN() const { return GetEntriesFast(); }
-inline MCCerenkov * MCCerenkovData::Get(int n) const { return (MCCerenkov *)At(n); }
+inline int MCScintData::GetN() const { return GetEntriesFast(); }
+inline MCScint * MCScintData::Get(int n) const { return (MCScint *)At(n); }
 
 #endif
