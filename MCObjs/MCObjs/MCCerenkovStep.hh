@@ -9,15 +9,15 @@ public:
   MCCerenkovStep(const MCCerenkovStep & step);
   virtual ~MCCerenkovStep();
 
-  inline void SetEnergyVisible(double val) { fEnergyVisible = val; }
+  // inline void SetEnergyVisible(double val) { fEnergyVisible = val; }
   inline void SetNCerenkovPhoton(int val) { fNCerenkovPhoton = val; }
 
-  inline float GetEnergyVisible() const { return fEnergyVisible; }
+  // inline float GetEnergyVisible() const { return fEnergyVisible; }
   inline int GetNCerenkovPhoton() const { return fNCerenkovPhoton; }
 
 private:
   int fNCerenkovPhoton;
-  float fEnergyVisible;
+  // float fEnergyVisible;
 
   ClassDef(MCCerenkovStep, 1)
 };

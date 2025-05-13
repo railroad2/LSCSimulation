@@ -5,14 +5,14 @@ ClassImp(MCCerenkovStep)
 MCCerenkovStep::MCCerenkovStep()
     : MCStep()
 {
-  fEnergyVisible = 0;
+  // fEnergyVisible = 0;
   fNCerenkovPhoton = 0;
 }
 
 MCCerenkovStep::MCCerenkovStep(const MCCerenkovStep & step)
     : MCStep(step)
 {
-  fEnergyVisible = step.GetEnergyVisible();
+  // fEnergyVisible = step.GetEnergyVisible();
   fNCerenkovPhoton = step.GetNCerenkovPhoton();
 }
 

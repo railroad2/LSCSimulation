@@ -20,12 +20,15 @@
 #include "G4UIdirectory.hh"
 #include "G4VPhysicalVolume.hh"
 #include "LSCSim/LSCScintillation.hh"
+#include "LSCSim/LSCCerenkov.hh"
 #include "LSCSim/PMTHit.hh"
 #include "MCObjs/MCPMT.hh"
 #include "MCObjs/MCPhotonHit.hh"
 #include "MCObjs/MCPrimary.hh"
 #include "MCObjs/MCScint.hh"
 #include "MCObjs/MCScintStep.hh"
+#include "MCObjs/MCCerenkov.hh"
+#include "MCObjs/MCCerenkovStep.hh"
 #include "MCObjs/MCTrack.hh"
 
 using namespace std;
@@ -39,6 +42,7 @@ LSCRootManager::LSCRootManager()
   fStepSaveOption = 0;
   fHitPhotonSave = 0;
   fScintStepSave = 0;
+  fCerenkovStepSave = 0;
 
   fROOTDir = new G4UIdirectory("/LSC/ROOT/");
 
@@ -46,6 +50,7 @@ LSCRootManager::LSCRootManager()
   fStepSaveOptCmd = new G4UIcmdWithAString("/LSC/ROOT/savestepopt", this);
   fHitPhotonSaveCmd = new G4UIcmdWithAString("/LSC/ROOT/savehitphoton", this);
   fScintStepSaveCmd = new G4UIcmdWithAString("/LSC/ROOT/savescintstep", this);
+  fCerenkovStepSaveCmd = new G4UIcmdWithAString("/LSC/ROOT/savecerenkovstep", this);
 
   G4cout << "LSCRootManager::LSCRootManager() created" << G4endl;
 }
@@ -56,6 +61,7 @@ LSCRootManager::~LSCRootManager()
   delete fStepSaveOptCmd;
   delete fHitPhotonSaveCmd;
   delete fScintStepSaveCmd;
+  delete fCerenkovStepSaveCmd;
 
   G4cout << "LSCRootManager::LSCRootManager() destroyed" << G4endl;
 }
@@ -77,6 +83,10 @@ void LSCRootManager::SetNewValue(G4UIcommand * command, G4String newValues)
   else if (command == fScintStepSaveCmd) {
     istringstream is((const char *)newValues);
     is >> fScintStepSave;
+  }
+  else if (command == fCerenkovStepSaveCmd) {
+    istringstream is((const char *)newValues);
+    is >> fCerenkovStepSave;
   }
 }
 
@@ -106,6 +116,7 @@ void LSCRootManager::EndOfRun(const G4Run * aRun)
   delete fPrimaryData;
   delete fTrackData;
   delete fScintData;
+  delete fCerenkovData;
   delete fPMTData;
 
   G4cout << G4endl;
@@ -121,6 +132,7 @@ void LSCRootManager::BeginOfEvent(const G4Event *)
   fPrimaryData->Clear();
   fTrackData->Clear();
   fScintData->Clear();
+  fCerenkovData->Clear();
   fPMTData->Clear();
 
   G4SDManager * SDman = G4SDManager::GetSDMpointer();
@@ -169,7 +181,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
 
   if (pmtHC) {
     G4int nPMT = pmtHC->entries();
-    G4cout << "nPMT: " << nPMT << endl;
+    G4cout << "nPMT: " << nPMT << endl; // kmlee debug
 
     for (int i = 0; i < nPMT; i++) {
       const PMTHit * pmt = (*pmtHC)[i];
@@ -181,7 +193,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
       int npe = 0;
 
       int nph = pmt->GetNHit();
-      G4cout << "nph: " << nph << endl;
+      G4cout << "nph: " << nph << endl; // kmlee debug
       if (fHitPhotonSave) {
         for (int j = 0; j < nph; j++) {
           MCPhotonHit * ph = pmt->GetHit(j);
@@ -252,8 +264,11 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
   G4Track * track = aStep->GetTrack();
   const G4ParticleDefinition * particleDef = track->GetParticleDefinition();
 
-  //if (proc->GetProcessName() == "Scintillation") {
-  if (proc->GetProcessName() == "Scintillation" || proc->GetProcessName() == "Cerenkov" ) {
+
+  /* Scintillation photon */
+  if (proc->GetProcessName() == "Scintillation") {
+    G4cout << proc->GetProcessName() << '\t'; // kmlee debug
+    G4cout << endl;
     LSCScintillation * scintproc = (LSCScintillation *)proc;
     G4String volumeName = volume->GetName();
     if (G4StrUtil::contains(volumeName, "LSPhys")) {
@@ -281,6 +296,40 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
       }
     }
     scintproc->InitializeScint();
+  }
+
+  /* Cerenkov (kmlee) */
+  if (aStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "Cerenkov") {
+    //LSCCerenkov * cerenkovproc = (LSCCerenkov *)proc;
+    LSCCerenkov * cerenkovproc = (LSCCerenkov *) aStep->GetPostStepPoint()->GetProcessDefinedStep();
+    G4cout << "Recording: " << cerenkovproc->GetProcessName() << G4endl; // kmlee debug
+    G4String volumeName = volume->GetName();
+    if (G4StrUtil::contains(volumeName, "LSPhys")) {
+      int volumeId;
+      if (G4StrUtil::contains(volumeName, "Target")) { volumeId = 0; }
+      else {
+        volumeId = 1;
+      }
+
+      auto aCerenkov = fCerenkovData->FindCerenkov(volumeId);
+      if (!aCerenkov) { aCerenkov = fCerenkovData->Add(volumeId); }
+
+      // aCerenkov->AddEnergyDeposit(cerenkovproc->GetEnergyDeposit());
+      // aCerenkov->AddEnergyVisible(cerenkovproc->GetEnergyVisible());
+      aCerenkov->AddCerenkovPhotons(cerenkovproc->GetNumPhotons());
+
+      if (fCerenkovStepSave) {
+        MCCerenkovStep * step = aCerenkov->AddStep();
+        step->SetStepLength(aStep->GetStepLength());
+        // step->SetEnergyDeposit(cerenkovproc->GetEnergyDeposit());
+        // step->SetEnergyVisible(cerenkovproc->GetEnergyVisible());
+        step->SetGlobalTime(postStepPoint->GetGlobalTime());
+        step->SetVolumeName(volume->GetName().data());
+        step->SetNCerenkovPhoton(cerenkovproc->GetNumPhotons());
+      }
+    }
+    cerenkovproc->InitializeCerenkov();
+    //cerenkovproc->Initialise();
   }
   
   if (fTrackSaveOption > 0 && fStepSaveOption > 0) {
@@ -318,6 +367,7 @@ void LSCRootManager::Booking()
   fPrimaryData = new MCPrimaryData();
   fTrackData = new MCTrackData();
   fScintData = new MCScintData();
+  fCerenkovData = new MCCerenkovData();
   fPMTData = new MCPMTData();
 
   fEventTree = new TTree("Event", "Event");
@@ -325,5 +375,6 @@ void LSCRootManager::Booking()
   fEventTree->Branch("MCPrimaryData", &fPrimaryData);
   fEventTree->Branch("MCTrackData", &fTrackData);
   fEventTree->Branch("MCScintData", &fScintData);
+  fEventTree->Branch("MCCerenkovData", &fCerenkovData);
   fEventTree->Branch("MCPMTData", &fPMTData);
 }

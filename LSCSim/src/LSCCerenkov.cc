@@ -234,6 +234,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
 // they are added to the particle change.
 
 {
+  //G4cout << "LSCCerenkov::PostStepDoIt is called!" << G4endl;
   aParticleChange.Initialize(aTrack);
 
   const G4DynamicParticle* aParticle = aTrack.GetDynamicParticle();
@@ -276,6 +277,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
 
   MeanNumberOfPhotons *= aStep.GetStepLength();
   fNumPhotons         = (G4int) G4Poisson(MeanNumberOfPhotons);
+  G4cout << "fNumPhotons (Cerenkov): " << fNumPhotons << G4endl;
 
   // third condition added to prevent infinite loop in do-while below,
   // see bugzilla 2555

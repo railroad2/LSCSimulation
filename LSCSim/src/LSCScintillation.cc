@@ -343,6 +343,8 @@ G4VParticleChange * LSCScintillation::PostStepDoIt(const G4Track & aTrack,
 
   Num = NumPhotons;
 
+  G4cout << "NumPhotons (Scintillation): " << NumPhotons << G4endl; // kmlee debug
+
   // Max Scintillation Integral
   G4double CIImax = ScintillationIntegral->GetMaxValue();
 

@@ -14,8 +14,8 @@ MCCerenkov::MCCerenkov()
   fVolumeId = 0;
 
   // Cerenkov
-  fEdep = 0;
-  fEdepQuenched = 0;
+  // fEdep = 0;
+  // fEdepQuenched = 0;
   fNCerenkovPhoton = 0;
 
   fNStep = 0;
@@ -27,8 +27,8 @@ MCCerenkov::MCCerenkov(int id)
   fVolumeId = id;
 
   // Cerenkov
-  fEdep = 0;
-  fEdepQuenched = 0;
+  // fEdep = 0;
+  // fEdepQuenched = 0;
   fNCerenkovPhoton = 0;
 
   fNStep = 0;
@@ -40,8 +40,8 @@ MCCerenkov::MCCerenkov(const MCCerenkov & cerenkov)
   fVolumeId = cerenkov.GetVolumeId();
 
   // Cerenkov
-  fEdep = cerenkov.GetEnergyDeposit();
-  fEdepQuenched = cerenkov.GetEnergyVisible();
+  // fEdep = cerenkov.GetEnergyDeposit();
+  // fEdepQuenched = cerenkov.GetEnergyVisible();
   fNCerenkovPhoton = cerenkov.GetNCerenkovPhoton();
 }
 
@@ -55,8 +55,8 @@ MCCerenkovStep * MCCerenkov::AddStep()
 void MCCerenkov::Clear(const Option_t * opt)
 {
   // Cerenkov
-  fEdep = 0;
-  fEdepQuenched = 0;
+  // fEdep = 0;
+  // fEdepQuenched = 0;
   fNCerenkovPhoton = 0;
 
   fNStep = 0;
@@ -66,10 +66,10 @@ void MCCerenkov::Clear(const Option_t * opt)
 void MCCerenkov::Print(const Option_t * opt) const
 {
   cout << Form("Volume: %d ", fVolumeId) << endl;
-  cout << Form("   Deposit Energy    = %.6f [MeV]", GetEnergyDeposit())
-       << endl;
-  cout << Form("   Visible Energy    = %.6f [MeV]", GetEnergyVisible())
-       << endl;
+  // cout << Form("   Deposit Energy    = %.6f [MeV]", GetEnergyDeposit())
+  //      << endl;
+  // cout << Form("   Visible Energy    = %.6f [MeV]", GetEnergyVisible())
+  //      << endl;
   cout << Form("   # of Cerenkov Photon = %d         ", GetNCerenkovPhoton()) << endl;
 
   if (GetNStep() > 0) {
