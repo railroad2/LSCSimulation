@@ -19,7 +19,7 @@ LSCScintillation::LSCScintillation(const G4String & processName,
                                    G4ProcessType type)
   : G4VRestDiscreteProcess(processName, type)
 {
-  SetProcessSubType(fScintillation);
+  SetProcessSubType(fScintillation); // 22
 
   fTrackSecondariesFirst = false;
 
@@ -343,7 +343,7 @@ G4VParticleChange * LSCScintillation::PostStepDoIt(const G4Track & aTrack,
 
   Num = NumPhotons;
 
-  G4cout << "NumPhotons (Scintillation): " << NumPhotons << G4endl; // kmlee debug
+  //G4cout << "NumPhotons (Scintillation): " << NumPhotons << G4endl; // kmlee debug
 
   // Max Scintillation Integral
   G4double CIImax = ScintillationIntegral->GetMaxValue();
@@ -422,6 +422,7 @@ G4VParticleChange * LSCScintillation::PostStepDoIt(const G4Track & aTrack,
     G4Track * secTrack = new G4Track(scintPhoton, secTime, secPosition);
     secTrack->SetTouchableHandle(aStep.GetPreStepPoint()->GetTouchableHandle());
     secTrack->SetParentID(aTrack.GetTrackID());
+    //secTrack->SetCreatorProcess(this); // kmlee 
     aParticleChange.AddSecondary(secTrack);
   }
 

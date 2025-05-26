@@ -88,7 +88,7 @@ LSCCerenkov::LSCCerenkov(const G4String& processName, G4ProcessType type)
   , fNumPhotons(0)
 {
   secID = G4PhysicsModelCatalog::GetModelID("model_Cerenkov");
-  SetProcessSubType(fCerenkov);
+  SetProcessSubType(fCerenkov); // 22
 
   thePhysicsTable = nullptr;
 
@@ -234,7 +234,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
 // they are added to the particle change.
 
 {
-  //G4cout << "LSCCerenkov::PostStepDoIt is called!" << G4endl;
+  //G4cout << "LSCCerenkov::PostStepDoIt is called!" << G4endl; // kmlee debug
   aParticleChange.Initialize(aTrack);
 
   const G4DynamicParticle* aParticle = aTrack.GetDynamicParticle();
@@ -277,7 +277,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
 
   MeanNumberOfPhotons *= aStep.GetStepLength();
   fNumPhotons         = (G4int) G4Poisson(MeanNumberOfPhotons);
-  G4cout << "fNumPhotons (Cerenkov): " << fNumPhotons << G4endl;
+  G4cout << "fNumPhotons (Cerenkov): " << fNumPhotons << G4endl; // kmlee debug
 
   // third condition added to prevent infinite loop in do-while below,
   // see bugzilla 2555
@@ -393,6 +393,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
       aStep.GetPreStepPoint()->GetTouchableHandle());
     aSecondaryTrack->SetParentID(aTrack.GetTrackID());
     aSecondaryTrack->SetCreatorModelID(secID);
+    //aSecondaryTrack->SetCreatorProcess(this); // kmlee 
     aParticleChange.AddSecondary(aSecondaryTrack);
   }
 

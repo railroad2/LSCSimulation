@@ -255,6 +255,9 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
 {
   if (!proc) return;
 
+  //G4VProcess * creatorProc = (G4VProcess*) aStep->GetTrack()->GetCreatorProcess(); //kmlee 
+  //if (!creatorProc) return; // kmlee
+
   G4StepPoint * preStepPoint = aStep->GetPreStepPoint();
   G4StepPoint * postStepPoint = aStep->GetPostStepPoint();
 
@@ -263,12 +266,17 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
 
   G4Track * track = aStep->GetTrack();
   const G4ParticleDefinition * particleDef = track->GetParticleDefinition();
-
+  
 
   /* Scintillation photon */
   if (proc->GetProcessName() == "Scintillation") {
+  //if (creatorProc->GetProcessName() == "Scintillation") {
+    /*
     G4cout << proc->GetProcessName() << '\t'; // kmlee debug
-    G4cout << endl;
+    G4cout << creatorProc->GetProcessName() << '\t'; // kmlee debug
+    G4cout << endl; // kmlee debug
+    */
+
     LSCScintillation * scintproc = (LSCScintillation *)proc;
     G4String volumeName = volume->GetName();
     if (G4StrUtil::contains(volumeName, "LSPhys")) {
@@ -299,10 +307,17 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
   }
 
   /* Cerenkov (kmlee) */
-  if (aStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "Cerenkov") {
+  if (postStepPoint->GetProcessDefinedStep()->GetProcessName() == "Cerenkov") {
+  //if (creatorProc->GetProcessName() == "Cerenkov") {
     //LSCCerenkov * cerenkovproc = (LSCCerenkov *)proc;
-    LSCCerenkov * cerenkovproc = (LSCCerenkov *) aStep->GetPostStepPoint()->GetProcessDefinedStep();
-    G4cout << "Recording: " << cerenkovproc->GetProcessName() << G4endl; // kmlee debug
+    /*
+    G4cout << proc->GetProcessName() << '\t'; // kmlee debug
+    G4cout << creatorProc->GetProcessName() << '\t'; // kmlee debug
+    G4cout << endl; // kmlee debug
+    */
+    LSCCerenkov * cerenkovproc = (LSCCerenkov *) postStepPoint->GetProcessDefinedStep();
+    //G4cout << "Recording in Cerenkov: " << cerenkovproc->GetProcessName() << G4endl; // kmlee debug
+
     G4String volumeName = volume->GetName();
     if (G4StrUtil::contains(volumeName, "LSPhys")) {
       int volumeId;
@@ -317,6 +332,7 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
       // aCerenkov->AddEnergyDeposit(cerenkovproc->GetEnergyDeposit());
       // aCerenkov->AddEnergyVisible(cerenkovproc->GetEnergyVisible());
       aCerenkov->AddCerenkovPhotons(cerenkovproc->GetNumPhotons());
+      G4cout << "cerenkovproc->GetNumPhotons: " << cerenkovproc->GetNumPhotons() << endl; 
 
       if (fCerenkovStepSave) {
         MCCerenkovStep * step = aCerenkov->AddStep();
