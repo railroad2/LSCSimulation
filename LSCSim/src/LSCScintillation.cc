@@ -343,8 +343,6 @@ G4VParticleChange * LSCScintillation::PostStepDoIt(const G4Track & aTrack,
 
   Num = NumPhotons;
 
-  //G4cout << "NumPhotons (Scintillation): " << NumPhotons << G4endl; // kmlee debug
-
   // Max Scintillation Integral
   G4double CIImax = ScintillationIntegral->GetMaxValue();
 
@@ -422,9 +420,6 @@ G4VParticleChange * LSCScintillation::PostStepDoIt(const G4Track & aTrack,
     G4Track * secTrack = new G4Track(scintPhoton, secTime, secPosition);
     secTrack->SetTouchableHandle(aStep.GetPreStepPoint()->GetTouchableHandle());
     secTrack->SetParentID(aTrack.GetTrackID());
-    //secTrack->SetCreatorModelID(23);
-    //secTrack->SetCreatorProcess(this); // kmlee 
-    //secTrack->SetCreatorProcess(new LSCScintillation()); // kmlee 
     aParticleChange.AddSecondary(secTrack);
   }
 
