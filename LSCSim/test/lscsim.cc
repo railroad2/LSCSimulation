@@ -137,7 +137,7 @@ int main(int argc, char ** argv)
     //UImanager->ApplyCommand(command);
 
     G4UIsession * theSession = new G4UIterminal(new G4UItcsh);
-    theSession->SessionStart();
+    //theSession->SessionStart();
   }
   else if (doInt) {
     G4UIExecutive* ui = new G4UIExecutive(argc, argv);
@@ -150,7 +150,7 @@ int main(int argc, char ** argv)
     UImanager->ApplyCommand(command);
 
     G4UIsession * theSession = new G4UIterminal(new G4UItcsh);
-    //theSession->SessionStart();
+    theSession->SessionStart();
     delete theSession;
   }
 

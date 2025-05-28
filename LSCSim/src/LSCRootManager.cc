@@ -181,7 +181,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
 
   if (pmtHC) {
     G4int nPMT = pmtHC->entries();
-    G4cout << "nPMT: " << nPMT << endl; // kmlee debug
+    //G4cout << "nPMT: " << nPMT << endl; // kmlee debug
 
     for (int i = 0; i < nPMT; i++) {
       const PMTHit * pmt = (*pmtHC)[i];
@@ -193,7 +193,7 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
       int npe = 0;
 
       int nph = pmt->GetNHit();
-      G4cout << "nph: " << nph << endl; // kmlee debug
+      //G4cout << "nph: " << nph << endl; // kmlee debug
       if (fHitPhotonSave) {
         for (int j = 0; j < nph; j++) {
           MCPhotonHit * ph = pmt->GetHit(j);
@@ -220,6 +220,7 @@ void LSCRootManager::RecordTrack(const G4Track * gtrack)
 
   if (fTrackSaveOption > 1 && particleName == "opticalphoton") return;
 
+
   if (fTrackSaveOption > 2) {
     // low energy electrons
     if (particleName == "e-") {
@@ -232,6 +233,55 @@ void LSCRootManager::RecordTrack(const G4Track * gtrack)
     }
   }
   if (fTrackSaveOption == 4 && particleName == "e-") return;
+
+  /* Cerenkov (kmlee) */
+  if (particleName == "opticalphoton" && processName != "Cerenkov") return;
+  //if (particleName == "opticalphoton") { if (processName == "Attenuation") { return; } } 
+#if 1
+  if (proc) {
+    if (proc->GetProcessName() == "Cerenkov") {
+      LSCCerenkov * cerenkovproc = (LSCCerenkov *) proc; 
+      
+      //G4String volumeName = volume->GetName();
+      if (true) { // (G4StrUtil::contains(volumeName, "LSPhys")) {
+        int volumeId = 0;
+        if (true) { // (G4StrUtil::contains(volumeName, "Target")) { 
+          volumeId = 0; 
+        }
+        else {
+          volumeId = 1;
+        }
+
+        auto aCerenkov = fCerenkovData->FindCerenkov(volumeId);
+        if (!aCerenkov) { aCerenkov = fCerenkovData->Add(volumeId); }
+
+        // aCerenkov->AddEnergyDeposit(cerenkovproc->GetEnergyDeposit());
+        // aCerenkov->AddEnergyVisible(cerenkovproc->GetEnergyVisible());
+        aCerenkov->AddCerenkovPhotons(cerenkovproc->GetNumPhotons());
+
+        /*
+        if (fCerenkovStepSave) {
+          MCCerenkovStep * step = aCerenkov->AddStep();
+          step->SetStepLength(aStep->GetStepLength());
+          // step->SetEnergyDeposit(cerenkovproc->GetEnergyDeposit());
+          // step->SetEnergyVisible(cerenkovproc->GetEnergyVisible());
+          step->SetGlobalTime(postStepPoint->GetGlobalTime());
+          step->SetVolumeName(volume->GetName().data());
+          step->SetNCerenkovPhoton(cerenkovproc->GetNumPhotons());
+          
+          if (cerenkovproc->GetNumPhotons() > 0) {
+            cout << "GetNCerenkovPhotoh: " << aCerenkov->GetNCerenkovPhoton()
+                << "  NCerenkovPhoton: " << cerenkovproc->GetNumPhotons() << endl;
+          }
+           //kmlee
+        }
+        */
+      }
+      cerenkovproc->InitializeCerenkov();
+      //cerenkovproc->Initialise();
+    }
+  }
+#endif 
 
   MCTrack * mtrack = fTrackData->FindTrack(gtrack->GetTrackID());
   if (!mtrack) {
@@ -255,9 +305,6 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
 {
   if (!proc) return;
 
-  //G4VProcess * creatorProc = (G4VProcess*) aStep->GetTrack()->GetCreatorProcess(); //kmlee 
-  //if (!creatorProc) return; // kmlee
-
   G4StepPoint * preStepPoint = aStep->GetPreStepPoint();
   G4StepPoint * postStepPoint = aStep->GetPostStepPoint();
 
@@ -267,16 +314,10 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
   G4Track * track = aStep->GetTrack();
   const G4ParticleDefinition * particleDef = track->GetParticleDefinition();
   
+  G4String procName = proc->GetProcessName();
 
   /* Scintillation photon */
   if (proc->GetProcessName() == "Scintillation") {
-  //if (creatorProc->GetProcessName() == "Scintillation") {
-    /*
-    G4cout << proc->GetProcessName() << '\t'; // kmlee debug
-    G4cout << creatorProc->GetProcessName() << '\t'; // kmlee debug
-    G4cout << endl; // kmlee debug
-    */
-
     LSCScintillation * scintproc = (LSCScintillation *)proc;
     G4String volumeName = volume->GetName();
     if (G4StrUtil::contains(volumeName, "LSPhys")) {
@@ -306,48 +347,6 @@ void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
     scintproc->InitializeScint();
   }
 
-  /* Cerenkov (kmlee) */
-  if (postStepPoint->GetProcessDefinedStep()->GetProcessName() == "Cerenkov") {
-  //if (creatorProc->GetProcessName() == "Cerenkov") {
-    //LSCCerenkov * cerenkovproc = (LSCCerenkov *)proc;
-    /*
-    G4cout << proc->GetProcessName() << '\t'; // kmlee debug
-    G4cout << creatorProc->GetProcessName() << '\t'; // kmlee debug
-    G4cout << endl; // kmlee debug
-    */
-    LSCCerenkov * cerenkovproc = (LSCCerenkov *) postStepPoint->GetProcessDefinedStep();
-    //G4cout << "Recording in Cerenkov: " << cerenkovproc->GetProcessName() << G4endl; // kmlee debug
-
-    G4String volumeName = volume->GetName();
-    if (G4StrUtil::contains(volumeName, "LSPhys")) {
-      int volumeId;
-      if (G4StrUtil::contains(volumeName, "Target")) { volumeId = 0; }
-      else {
-        volumeId = 1;
-      }
-
-      auto aCerenkov = fCerenkovData->FindCerenkov(volumeId);
-      if (!aCerenkov) { aCerenkov = fCerenkovData->Add(volumeId); }
-
-      // aCerenkov->AddEnergyDeposit(cerenkovproc->GetEnergyDeposit());
-      // aCerenkov->AddEnergyVisible(cerenkovproc->GetEnergyVisible());
-      aCerenkov->AddCerenkovPhotons(cerenkovproc->GetNumPhotons());
-      G4cout << "cerenkovproc->GetNumPhotons: " << cerenkovproc->GetNumPhotons() << endl; 
-
-      if (fCerenkovStepSave) {
-        MCCerenkovStep * step = aCerenkov->AddStep();
-        step->SetStepLength(aStep->GetStepLength());
-        // step->SetEnergyDeposit(cerenkovproc->GetEnergyDeposit());
-        // step->SetEnergyVisible(cerenkovproc->GetEnergyVisible());
-        step->SetGlobalTime(postStepPoint->GetGlobalTime());
-        step->SetVolumeName(volume->GetName().data());
-        step->SetNCerenkovPhoton(cerenkovproc->GetNumPhotons());
-      }
-    }
-    cerenkovproc->InitializeCerenkov();
-    //cerenkovproc->Initialise();
-  }
-  
   if (fTrackSaveOption > 0 && fStepSaveOption > 0) {
     int trackId = track->GetTrackID();
     MCTrack * mcTrack = fTrackData->FindTrack(trackId);

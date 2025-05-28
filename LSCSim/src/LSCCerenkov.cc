@@ -277,7 +277,7 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
 
   MeanNumberOfPhotons *= aStep.GetStepLength();
   fNumPhotons         = (G4int) G4Poisson(MeanNumberOfPhotons);
-  G4cout << "fNumPhotons (Cerenkov): " << fNumPhotons << G4endl; // kmlee debug
+  //G4cout << "fNumPhotons (Cerenkov): " << fNumPhotons << G4endl; // kmlee debug
 
   // third condition added to prevent infinite loop in do-while below,
   // see bugzilla 2555
@@ -393,7 +393,6 @@ G4VParticleChange* LSCCerenkov::PostStepDoIt(const G4Track& aTrack,
       aStep.GetPreStepPoint()->GetTouchableHandle());
     aSecondaryTrack->SetParentID(aTrack.GetTrackID());
     aSecondaryTrack->SetCreatorModelID(secID);
-    //aSecondaryTrack->SetCreatorProcess(this); // kmlee 
     aParticleChange.AddSecondary(aSecondaryTrack);
   }
 
