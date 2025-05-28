@@ -26,6 +26,11 @@ public:
                  const G4ThreeVector & position, const G4ThreeVector & momentum,
                  const G4ThreeVector & polarization, G4int iHitPhotonCount);
 
+  void SimpleHit(G4int ipmt, G4double time, G4double kineticEnergy,
+                 const G4ThreeVector & position, const G4ThreeVector & momentum,
+                 const G4ThreeVector & polarization, G4int iHitPhotonCount, 
+                 G4String processName);
+
 private:
   PMTHitsCollection * fPMTHitCollection;
 };

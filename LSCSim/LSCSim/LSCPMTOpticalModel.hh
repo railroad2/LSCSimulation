@@ -25,6 +25,7 @@
 #include "G4OpticalSurface.hh"
 #include "G4UImessenger.hh"
 #include "G4VFastSimulationModel.hh"
+#include "G4VProcess.hh" // kmlee
 
 class G4UIcommand;
 class G4UIdirectory;

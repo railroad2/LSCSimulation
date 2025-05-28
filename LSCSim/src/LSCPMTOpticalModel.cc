@@ -450,10 +450,17 @@ void LSCPMTOpticalModel::DoIt(const G4FastTrack & fastTrack,
       }
     }
 
+    /* added by kmlee for tagging process name*/
+    G4Track* track = (G4Track*) fastTrack.GetPrimaryTrack(); 
+    G4VProcess* proc = (G4VProcess*) track->GetCreatorProcess();
+    std::string procName = proc? proc->GetProcessName() : "unknown"; 
+
     if (N_pe > 0) {
       if (detector != NULL && detector->isActive())
+        //((LSCPMTSD *)detector)
+        //    ->SimpleHit(ipmt, time, energy, pos, dir, pol, N_pe);
         ((LSCPMTSD *)detector)
-            ->SimpleHit(ipmt, time, energy, pos, dir, pol, N_pe);
+            ->SimpleHit(ipmt, time, energy, pos, dir, pol, N_pe, procName);
       if (_verbosity >= 2) {
         G4cout << "LSCPMTOpticalModel made " << N_pe << " pe\n";
       }

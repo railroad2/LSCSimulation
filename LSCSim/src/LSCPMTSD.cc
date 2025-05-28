@@ -67,6 +67,36 @@ void LSCPMTSD::SimpleHit(G4int ipmt, G4double time, G4double kineticEnergy,
   hit->SetKineticEnergy((float)kineticEnergy);
 }
 
+// added by kmlee for process name
+void LSCPMTSD::SimpleHit(G4int ipmt, G4double time, G4double kineticEnergy,
+                          const G4ThreeVector & hit_position,
+                          const G4ThreeVector & hit_momentum,
+                          const G4ThreeVector & hit_polarization,
+                          G4int iHitPhotonCount, 
+                          G4String processName)
+{
+  PMTHit * pmt = nullptr;
+
+  G4int n = fPMTHitCollection->entries();
+  for (G4int i = 0; i < n; i++) {
+    if ((*fPMTHitCollection)[i]->GetPMTId() == ipmt) {
+      pmt = (*fPMTHitCollection)[i];
+      break;
+    }
+  }
+
+  if (!pmt) {           // this pmt wasnt previously hit in this event
+    pmt = new PMTHit(); // so create new hit
+    pmt->SetPMTId(ipmt);
+    fPMTHitCollection->insert(pmt);
+  }
+
+  MCPhotonHit * hit = pmt->AddHit();
+  hit->SetTime((float)time);
+  hit->SetKineticEnergy((float)kineticEnergy);
+  hit->SetProcessName((string)processName); // added by kmlee
+}
+
 void LSCPMTSD::EndOfEvent(G4HCofThisEvent *) {}
 
 void LSCPMTSD::clear() {}

@@ -7,6 +7,7 @@ MCPhotonHit::MCPhotonHit()
 {
   fTime = 0;
   fKE = 0;
+  fProcessName = ""; // added by kmlee
 }
 
 MCPhotonHit::MCPhotonHit(const MCPhotonHit & photon)
@@ -14,6 +15,7 @@ MCPhotonHit::MCPhotonHit(const MCPhotonHit & photon)
 {
   fTime = photon.GetTime();
   fKE = photon.GetKineticEnergy();
+  fProcessName = photon.GetProcessName(); // added by kmlee
 }
 
 MCPhotonHit::~MCPhotonHit() {}
