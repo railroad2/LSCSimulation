@@ -16,6 +16,7 @@
 #include "LSCSim/LSCDetectorConstruction.hh"
 #include "LSCSim/LSCPMTSD.hh"
 #include "LSCSim/LSC_PMT_LogicalVolume.hh"
+#include "LSCSim/LightCon.hh"
 
 using namespace std;
 using namespace CLHEP;
@@ -197,14 +198,12 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
                 FatalException, msg);
   }
 
-  //auto PMT_cylinder = new G4Tubs();
-  //auto PMT_log = new G4LogicalVolume(
-
-  //auto lc = new LightCon();
-  //auto lc_log = lc->Construct_LightCon("profile1.txt");
-  //lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
+  auto lc = new LightCon();
+  auto lc_log = lc->Construct_LightCon("profile1.txt");
+  lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
 
   char PMTname[64];
+  char LCname[64];
 
   double coord_x, coord_y, coord_z;
   int pmtno, nring, region;
@@ -218,6 +217,7 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     sline >> pmtno >> coord_x >> coord_y >> coord_z >> nring >> region;
 
     sprintf(PMTname, "InnerPMTPhys%d", pmtno);
+    sprintf(LCname, "LCPhys%d", pmtno);
 
     G4double r =
         sqrt(coord_x * coord_x + coord_y * coord_y + coord_z * coord_z);
@@ -242,8 +242,16 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     PMT_rotation->rotateX(M_PI / 2.0 - angle_x);
 
     G4ThreeVector pmtpos(coord_x, coord_y, coord_z);
+    G4ThreeVector lcpos(coord_x, coord_y, coord_z);
 
-    new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT20,
+    auto pmtphys = new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT20,
                       BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
+
+    new G4PVPlacement(PMT_rotation, pmtpos, LCname, lc_log, 
+                      BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
+
+    sprintf(LCname, "LCPhys%d_2", pmtno);
+    new G4PVPlacement(PMT_rotation, pmtpos, LCname, lc_log, 
+                      pmtphys, false, pmtno - 1, fGeomCheck);
   }
 }
