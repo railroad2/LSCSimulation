@@ -314,30 +314,6 @@ LSC_10inch_LogicalVolume::LSC_10inch_LogicalVolume(
       DynodeMat,           // dynode stack metal
       detector             // detector hook
   );
-
-  /* light concentrator (added by kmlee) */
-  //if (fLightConcentrator) {
-  if (false) {
-    auto lc = new LightCon();
-    auto lc_log = lc->Construct_LightCon("profile1.txt");
-
-    auto lc_phys = new G4PVPlacement(0, 
-                      G4ThreeVector(0., 0., z_equator+40+3),
-                      lc_log,
-                      "lightcon_phys",
-                      this,
-                      false, 
-                      0);
-
-    
-    
-    /*
-    new G4LogicalBorderSurface("lcsurf1", lc_phys,
-                             this, our_Mirror_opsurf);
-    new G4LogicalBorderSurface("lcsurf2", this,
-                             lc_phys, our_Mirror_opsurf);
-                             */
-  }
   
 
   if (MaskMat != NULL) {

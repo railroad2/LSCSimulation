@@ -208,6 +208,17 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
   double coord_x, coord_y, coord_z;
   int pmtno, nring, region;
 
+  auto our_Mirror_opsurf = new G4OpticalSurface("mirror_opsurf");
+  our_Mirror_opsurf->SetFinish(polishedfrontpainted);
+  our_Mirror_opsurf->SetModel(glisur);
+  our_Mirror_opsurf->SetType(dielectric_metal);
+  our_Mirror_opsurf->SetPolish(0.999);
+  G4MaterialPropertiesTable* propMirror = new G4MaterialPropertiesTable();
+  propMirror->AddProperty("REFLECTIVITY", new G4MaterialPropertyVector());
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 0.9999);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.9999);
+  our_Mirror_opsurf->SetMaterialPropertiesTable(propMirror);
+
   string line;
   ifstream pmtposfile(fPMTPositionDataFile.c_str());
   while (getline(pmtposfile, line)) {
@@ -217,7 +228,6 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     sline >> pmtno >> coord_x >> coord_y >> coord_z >> nring >> region;
 
     sprintf(PMTname, "InnerPMTPhys%d", pmtno);
-    sprintf(LCname, "LCPhys%d", pmtno);
 
     G4double r =
         sqrt(coord_x * coord_x + coord_y * coord_y + coord_z * coord_z);
@@ -242,16 +252,30 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     PMT_rotation->rotateX(M_PI / 2.0 - angle_x);
 
     G4ThreeVector pmtpos(coord_x, coord_y, coord_z);
-    G4ThreeVector lcpos(coord_x, coord_y, coord_z);
+    G4ThreeVector lcpos(coord_x, coord_y, coord_z-105);
 
-    auto pmtphys = new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT20,
+    auto pmt_phys = new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT20,
                       BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
 
-    new G4PVPlacement(PMT_rotation, pmtpos, LCname, lc_log, 
-                      BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
+    G4PVPlacement *lc_phys, *lc_phys2;
+    if (true) {
+        sprintf(LCname, "LCPhys%d", pmtno);
+        lc_phys = new G4PVPlacement(PMT_rotation, lcpos, LCname, lc_log, 
+                          BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
 
-    sprintf(LCname, "LCPhys%d_2", pmtno);
-    new G4PVPlacement(PMT_rotation, pmtpos, LCname, lc_log, 
-                      pmtphys, false, pmtno - 1, fGeomCheck);
+    }
+    if (true) {
+        new G4LogicalBorderSurface("surface", BufferLiquidPhys, lc_phys,  our_Mirror_opsurf);
+        new G4LogicalBorderSurface("surface1", pmt_phys, lc_phys, our_Mirror_opsurf);
+    }
+    if (true) {
+        sprintf(LCname, "LCPhys%d_2", pmtno);
+        lc_phys2 = new G4PVPlacement(0, G4ThreeVector(0, 0, 105), LCname, lc_log, 
+                          pmt_phys, false, pmtno - 1, fGeomCheck);
+    }
+    if (true) {
+        new G4LogicalBorderSurface("surface2", BufferLiquidPhys, lc_phys2,  our_Mirror_opsurf);
+        new G4LogicalBorderSurface("surface3", pmt_phys, lc_phys2, our_Mirror_opsurf);
+    }
   }
 }

@@ -96,6 +96,17 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
                 FatalException, msg);
   }
 
+  auto our_Mirror_opsurf = new G4OpticalSurface("mirror_opsurf");
+  our_Mirror_opsurf->SetFinish(polishedfrontpainted);
+  our_Mirror_opsurf->SetModel(glisur);
+  our_Mirror_opsurf->SetType(dielectric_metal);
+  our_Mirror_opsurf->SetPolish(0.999);
+  G4MaterialPropertiesTable* propMirror = new G4MaterialPropertiesTable();
+  propMirror->AddProperty("REFLECTIVITY", new G4MaterialPropertyVector());
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 0.9999);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.9999);
+  our_Mirror_opsurf->SetMaterialPropertiesTable(propMirror);
+
   auto lc = new LightCon();
   auto lc_log = lc->Construct_LightCon("profile1.txt");
   lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
@@ -142,9 +153,23 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
     G4ThreeVector pmtpos(coord_x, coord_y, coord_z);
     G4ThreeVector lcpos(coord_x, coord_y, coord_z-105);
 
-    new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT,
+    auto pmt_phys = new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT,
                       BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
-    new G4PVPlacement(PMT_rotation, lcpos, LCname, lc_log,
+
+    auto lc_phys = new G4PVPlacement(PMT_rotation, lcpos, LCname, lc_log, 
                       BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
+
+    sprintf(LCname, "LCPhys%d_2", pmtno);
+    auto lc_phys2 = new G4PVPlacement(0, G4ThreeVector(0, 0, 105), LCname, lc_log, 
+                      pmt_phys, false, pmtno - 1, fGeomCheck);
+
+    G4LogicalBorderSurface* surface =
+        new G4LogicalBorderSurface("surface", BufferLiquidPhys, lc_phys,  our_Mirror_opsurf);
+    G4LogicalBorderSurface* surface1 =
+        new G4LogicalBorderSurface("surface1", pmt_phys, lc_phys, our_Mirror_opsurf);
+    G4LogicalBorderSurface* surface2 =
+        new G4LogicalBorderSurface("surface2", BufferLiquidPhys, lc_phys2,  our_Mirror_opsurf);
+    G4LogicalBorderSurface* surface3 =
+        new G4LogicalBorderSurface("surface3", pmt_phys, lc_phys2, our_Mirror_opsurf);
   }
 }
