@@ -133,15 +133,16 @@ int main(int argc, char ** argv)
 
   
   if (!doVis) {
-    //command = Form("/run/beamOn %d", nevent);
-    //UImanager->ApplyCommand(command);
+    command = Form("/run/beamOn %d", nevent);
+    UImanager->ApplyCommand(command);
 
     G4UIsession * theSession = new G4UIterminal(new G4UItcsh);
     //theSession->SessionStart();
   }
   else if (doInt) {
     G4UIExecutive* ui = new G4UIExecutive(argc, argv);
-    UImanager->ApplyCommand("/control/execute mac/init_vis.mac");  
+    command = Form("/control/execute %s", vis_macroFileName.c_str());
+    UImanager->ApplyCommand(command);
     ui->SessionStart();
     delete ui;
   }

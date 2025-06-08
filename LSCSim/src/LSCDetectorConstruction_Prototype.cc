@@ -83,7 +83,8 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
   // --- make the fundamental inner  PMT assembly
   ///////////////////////////////////////////////////////////////////////////
   auto _logiInnerPMT = new LSC_10inch_LogicalVolume(
-      "InnerPMT", G4Material::GetMaterial("Water"),
+      "InnerPMT", 
+      BufferLiquidLog->GetMaterial(), //G4Material::GetMaterial("Water"),
       G4Material::GetMaterial("Glass"), Photocathode_opsurf,
       G4Material::GetMaterial("PMT_Vac"), G4Material::GetMaterial("Steel"),
       nullptr,
@@ -94,6 +95,38 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
     G4cerr << msg << G4endl;
     G4Exception("LSCDetectorConstruction::LSCDetectorConstruction", "",
                 FatalException, msg);
+  }
+
+  auto lc = new LightCon();
+  G4cout << "Constructing light concentrator with profile: "
+         << fLightConProfile << G4endl;
+  auto lc_log = lc->Construct_LightCon(fLightConProfile);
+  lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
+
+  auto pmt_assembly = new G4Tubs("pmt_assembly", 0,  13.5*cm, 20.0*cm, 
+                            0, 360*deg);
+
+  auto pmt_assembly_log = new G4LogicalVolume(pmt_assembly, 
+                            BufferLiquidLog->GetMaterial(), 
+                            "pmt_assembly_log");
+
+  pmt_assembly_log->SetVisAttributes(G4VisAttributes::GetInvisible());
+
+  auto pmt_phys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), 
+                                    _logiInnerPMT, "pmt_phys", 
+                                    pmt_assembly_log, false, 0, fGeomCheck);
+
+  G4PVPlacement *lc_phys = nullptr;
+  G4PVPlacement *lc_phys2 = nullptr;
+
+  double z_lc = 105; // z-position of light concentrator
+  if (fLightConcentrator) {
+    lc_phys = new G4PVPlacement(0, G4ThreeVector(0, 0, z_lc), 
+                                        lc_log, "lc_phys", 
+                                        pmt_assembly_log, false, 0, fGeomCheck);
+    lc_phys2 = new G4PVPlacement(0, G4ThreeVector(0, 0, z_lc), 
+                                        "lc_phys2", lc_log, 
+                                        pmt_phys, false, 0, fGeomCheck);
   }
 
   auto our_Mirror_opsurf = new G4OpticalSurface("mirror_opsurf");
@@ -107,12 +140,8 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
   propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.9999);
   our_Mirror_opsurf->SetMaterialPropertiesTable(propMirror);
 
-  auto lc = new LightCon();
-  auto lc_log = lc->Construct_LightCon("profile1.txt");
-  lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
-
   char PMTname[64];
-  char LCname[64];
+  char surfname[64];
 
   double coord_x, coord_y, coord_z;
   int pmtno, nring, region;
@@ -126,7 +155,6 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
     sline >> pmtno >> coord_x >> coord_y >> coord_z >> nring >> region;
 
     sprintf(PMTname, "InnerPMTPhys%d", pmtno);
-    sprintf(LCname, "LCPhys%d", pmtno);
 
     G4double r =
         sqrt(coord_x * coord_x + coord_y * coord_y + coord_z * coord_z);
@@ -151,25 +179,17 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
     PMT_rotation->rotateX(M_PI / 2.0 - angle_x);
 
     G4ThreeVector pmtpos(coord_x, coord_y, coord_z);
-    G4ThreeVector lcpos(coord_x, coord_y, coord_z-105);
 
-    auto pmt_phys = new G4PVPlacement(PMT_rotation, pmtpos, PMTname, _logiInnerPMT,
-                      BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
+    auto pmt_assembly_phys = new G4PVPlacement(
+        PMT_rotation, pmtpos, PMTname, pmt_assembly_log, BufferLiquidPhys,
+        false, pmtno - 1, fGeomCheck);
 
-    auto lc_phys = new G4PVPlacement(PMT_rotation, lcpos, LCname, lc_log, 
-                      BufferLiquidPhys, false, pmtno - 1, fGeomCheck);
-
-    sprintf(LCname, "LCPhys%d_2", pmtno);
-    auto lc_phys2 = new G4PVPlacement(0, G4ThreeVector(0, 0, 105), LCname, lc_log, 
-                      pmt_phys, false, pmtno - 1, fGeomCheck);
-
-    G4LogicalBorderSurface* surface =
-        new G4LogicalBorderSurface("surface", BufferLiquidPhys, lc_phys,  our_Mirror_opsurf);
-    G4LogicalBorderSurface* surface1 =
-        new G4LogicalBorderSurface("surface1", pmt_phys, lc_phys, our_Mirror_opsurf);
-    G4LogicalBorderSurface* surface2 =
-        new G4LogicalBorderSurface("surface2", BufferLiquidPhys, lc_phys2,  our_Mirror_opsurf);
-    G4LogicalBorderSurface* surface3 =
-        new G4LogicalBorderSurface("surface3", pmt_phys, lc_phys2, our_Mirror_opsurf);
+    if (fLightConcentrator) {
+        sprintf(surfname, "surface%d", pmtno);
+        new G4LogicalBorderSurface(surfname, pmt_assembly_phys, lc_phys,  our_Mirror_opsurf);
+        sprintf(surfname, "surface%d_1", pmtno);
+        new G4LogicalBorderSurface(surfname, pmt_phys, lc_phys2,  our_Mirror_opsurf);
+    }
+        
   }
 }

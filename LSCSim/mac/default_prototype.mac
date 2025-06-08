@@ -8,6 +8,7 @@
 /LSC/det/geometrydata /home/cupsoft/Devs/lscdev/LSCSimulation/LSCSim/data/geometry_prototype.dat
 /LSC/det/materialdata /home/cupsoft/Devs/lscdev/LSCSimulation/LSCSim/data/materials.dat
 /LSC/det/pmtposdata /home/cupsoft/Devs/lscdev/LSCSimulation/LSCSim/data/pmtpos_prototype.dat
+/LSC/det/lightconcentrator 0 
 
 /LSC/ROOT/savetrackopt  0
 /LSC/ROOT/savestepopt  0

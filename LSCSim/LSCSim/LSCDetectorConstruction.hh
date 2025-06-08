@@ -51,6 +51,8 @@ private:
   G4String fGeometryDataFile;
   G4String fPMTPositionDataFile;
   G4String fWhichDetector;
+  G4int fLightConcentrator;
+  G4String fLightConProfile;
 
   G4UIdirectory * fDetectorDir;
   G4UIcmdWithAnInteger * fGeomCheckOptCmd;
@@ -58,6 +60,9 @@ private:
   G4UIcmdWithAString * fGeometryDataFileCmd;
   G4UIcmdWithAString * fPMTPositionDataFileCmd;
   G4UIcmdWithAString * fWhichDetectorCmd;
+  G4UIcmdWithAnInteger * fLightConcentratorCmd;
+  G4UIcmdWithAString * fLightConProfileCmd;
+
   G4int fGeomCheck;
 };
 

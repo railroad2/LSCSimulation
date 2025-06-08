@@ -49,11 +49,15 @@ LSCDetectorConstruction::LSCDetectorConstruction()
   fGeometryDataFileCmd = new G4UIcmdWithAString("/LSC/det/geometrydata", this);
   fPMTPositionDataFileCmd = new G4UIcmdWithAString("/LSC/det/pmtposdata", this);
   fWhichDetectorCmd = new G4UIcmdWithAString("/LSC/det/detector", this);
+  fLightConcentratorCmd = new G4UIcmdWithAnInteger("/LSC/det/lightconcentrator", this);
+  fLightConProfileCmd = new G4UIcmdWithAString("/LSC/det/lightconprofile", this);
 
   fGeometryDataFile = "";
   fPMTPositionDataFile = "";
   fMaterialDataFile = "";
-  fWhichDetector = "LS";
+  fWhichDetector = "";
+  fLightConcentrator = 0; // default is no light concentrator
+  fLightConProfile = "";
 }
 
 LSCDetectorConstruction::~LSCDetectorConstruction()
@@ -63,6 +67,9 @@ LSCDetectorConstruction::~LSCDetectorConstruction()
   delete fMaterialDataFileCmd;
   delete fGeometryDataFileCmd;
   delete fPMTPositionDataFileCmd;
+  delete fWhichDetectorCmd;
+  delete fLightConcentratorCmd;
+  delete fLightConProfileCmd;
 }
 
 void LSCDetectorConstruction::SetNewValue(G4UIcommand * command,
@@ -82,7 +89,16 @@ void LSCDetectorConstruction::SetNewValue(G4UIcommand * command,
   if (command == fPMTPositionDataFileCmd) {
     if (fPMTPositionDataFile.empty()) fPMTPositionDataFile = newValues;
   }
-  if (command == fWhichDetectorCmd) { fWhichDetector = newValues; }
+  if (command == fWhichDetectorCmd) {
+    if (fWhichDetector.empty()) fWhichDetector = newValues;
+  }
+  if (command == fLightConcentratorCmd) {
+    istringstream is(newValues);
+    is >> fLightConcentrator;
+  }
+  if (command == fLightConProfileCmd) {
+    if (fLightConProfile.empty()) fLightConProfile = newValues;
+  }
 }
 
 G4VPhysicalVolume * LSCDetectorConstruction::Construct()
