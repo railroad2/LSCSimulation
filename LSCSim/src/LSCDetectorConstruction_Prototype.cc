@@ -97,11 +97,26 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
                 FatalException, msg);
   }
 
-  auto lc = new LightCon();
-  G4cout << "Constructing light concentrator with profile: "
-         << fLightConProfile << G4endl;
-  auto lc_log = lc->Construct_LightCon(fLightConProfile);
-  lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
+  if (access(fLightConProfile.c_str(), F_OK) != 0) {
+    G4String msg = "Error, light concentrator profile file could not be opened.\n";
+    G4cerr << msg << G4endl;
+    //G4Exception("LSCDetectorConstruction::LSCDetectorConstruction", "",
+    //            FatalException, msg);
+    fLightConcentrator = false;
+  }
+
+  LightCon* lc = nullptr;
+  G4LogicalVolume* lc_log = nullptr;
+  G4PVPlacement *lc_phys = nullptr;
+  G4PVPlacement *lc_phys2 = nullptr;
+  
+  if (fLightConcentrator) {
+    lc = new LightCon();
+    G4cout << "Constructing light concentrator with profile: "
+            << fLightConProfile << G4endl;
+    lc_log = lc->Construct_LightCon(fLightConProfile);
+    lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
+  }
 
   auto pmt_assembly = new G4Tubs("pmt_assembly", 0,  13.5*cm, 20.0*cm, 
                             0, 360*deg);
@@ -116,8 +131,6 @@ void LSCDetectorConstruction::ConstructDetector_Prototype(
                                     _logiInnerPMT, "pmt_phys", 
                                     pmt_assembly_log, false, 0, fGeomCheck);
 
-  G4PVPlacement *lc_phys = nullptr;
-  G4PVPlacement *lc_phys2 = nullptr;
 
   double z_lc = 105; // z-position of light concentrator
   if (fLightConcentrator) {

@@ -208,6 +208,8 @@ void LSCRootManager::EndOfEvent(const G4Event * anEvent)
 
 void LSCRootManager::RecordTrack(const G4Track * gtrack)
 {
+  G4cout << "RecordTrack is called for track ID: "
+         << gtrack->GetTrackID() << G4endl;
   const G4VProcess * proc = gtrack->GetCreatorProcess();
   G4String particleName = gtrack->GetParticleDefinition()->GetParticleName();
   G4String processName = proc ? proc->GetProcessName() : "";
@@ -273,6 +275,7 @@ void LSCRootManager::RecordTrack(const G4Track * gtrack)
 
 void LSCRootManager::RecordStep(const G4Step * aStep, const G4VProcess * proc)
 {
+  if (!aStep) return;
   if (!proc) return;
 
   G4StepPoint * preStepPoint = aStep->GetPreStepPoint();
