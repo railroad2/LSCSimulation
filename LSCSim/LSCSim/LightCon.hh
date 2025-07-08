@@ -1,6 +1,7 @@
 #ifndef __LightCon_hh__
 #define __LightCon_hh__
 
+#include <unistd.h>
 #include "G4LogicalVolume.hh"
 
 class LightCon {
