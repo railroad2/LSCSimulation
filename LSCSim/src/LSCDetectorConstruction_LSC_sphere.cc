@@ -220,7 +220,17 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
     lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
   }
 
-  auto pmt_assembly = new G4Tubs("pmt_assembly", 0,  13.5*cm, 20.0*cm, 
+  double z_lc = 105*mm; // z-position of light concentrator
+  G4double r_tube = 13.5*cm;
+  G4double z_tube = 20.0*cm;
+
+  r_tube = lc->GetRMax();
+  z_tube = lc->GetZMax() + z_lc;
+
+  G4cout << r_tube << endl;
+  G4cout << z_tube << endl;
+
+  auto pmt_assembly = new G4Tubs("pmt_assembly", 0,  r_tube, z_tube, 
                             0, 360*deg);
 
   auto pmt_assembly_log = new G4LogicalVolume(pmt_assembly, 
@@ -233,7 +243,6 @@ void LSCDetectorConstruction::ConstructDetector_LSC_sphere(
                                     _logiInnerPMT20, "pmt_phys", 
                                     pmt_assembly_log, false, 0, fGeomCheck);
 
-  double z_lc = 105; // z-position of light concentrator 
   if (fLightConcentrator) {
     lc_phys = new G4PVPlacement(0, G4ThreeVector(0, 0, z_lc), 
                                 lc_log, "lc_phys", 

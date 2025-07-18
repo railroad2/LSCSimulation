@@ -25,9 +25,16 @@ G4LogicalVolume* LightCon::Construct_LightCon(G4String ifname) {
     }
     G4double x, z;
 
+    r_max = 0;
+    z_max = 0;
+
     while (infile >> x >> z) {
         r_vals.push_back(x * cm);
         z_vals.push_back(z * cm);
+        if (x*cm > r_max) 
+            r_max = x*cm;
+        if (z*cm > z_max) 
+            z_max = z*cm;
     }
     infile.close();
 
@@ -44,6 +51,7 @@ G4LogicalVolume* LightCon::Construct_LightCon(G4String ifname) {
         r_vals_inner[i] = r_vals[i];
         r_vals_outer[i] = r_vals[i] + thickness;
     }
+    r_max += thickness;
 
     G4Polycone* solidConcentrator = new G4Polycone(
         "Concentrator", 0.0 * deg, 360.0 * deg, numZ,
