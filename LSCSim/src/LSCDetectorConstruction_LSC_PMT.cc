@@ -130,7 +130,7 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
 
     string ftmp = fPMTPositionDataFile;  
     transform(ftmp.begin(), ftmp.end(), ftmp.begin(), ::tolower);
-    if (ftmp.find("sphere")) {
+    if ((long)ftmp.find("sphere") >= 0) {
       angle_x = atan2(dz, sqrt(dx * dx + dy * dy));
     }
     else if (region == 0) { // cylinder wall
