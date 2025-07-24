@@ -128,13 +128,12 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
     double angle_z = atan2(dx, dy);
     double angle_x = atan2(dz, sqrt(dx * dx + dy * dy));
 
-    if (region != 0) {
-      // top or bottom PMTs
-      double normal_angle = (region > 0 ? -M_PI / 2 : M_PI / 2);
-      angle_x = normal_angle;
+    if (region == 0) { // cylinder wall
+      angle_x = 0; 
     }
-    else {
-      angle_x = 0;
+    if (region == -1 || region == 1) { // top or bottom PMTs
+        double normal_angle = (region > 0 ? -M_PI / 2 : M_PI / 2);
+        angle_x = normal_angle;
     }
 
     auto PMT_rotation = new G4RotationMatrix();
