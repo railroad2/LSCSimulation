@@ -35,12 +35,12 @@ private:
 
   void ConstructMaterials();
   G4VPhysicalVolume * ConstructDetector();
-  void ConstructDetector_LSC_ExpHall(G4VPhysicalVolume * worldphys);
+  void ConstructDetector_LSC_ExpHall(G4VPhysicalVolume * worldphys, GLG4param & geom_db);
+  void ConstructDetector_LSC_PMT(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd);
   void ConstructDetector_LSC_Cylinder(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
   void ConstructDetector_LSC_Sphere(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
   void ConstructDetector_Prototype(G4VPhysicalVolume * worldphys, LSCPMTSD * pmtsd, GLG4param & geom_db);
 
-  
   // Optical surface
   G4OpticalSurface * Photocathode_opsurf;
   G4OpticalSurface * Stainless_opsurf;

@@ -2,11 +2,9 @@
 #include <string>
 #include <vector>
 
-#include "G4Tubs.hh"
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 #include "G4Polycone.hh"
-#include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 
 #include "LSCSim/LightCon.hh"
