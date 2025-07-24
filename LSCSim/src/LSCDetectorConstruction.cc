@@ -49,15 +49,11 @@ LSCDetectorConstruction::LSCDetectorConstruction()
   fGeometryDataFileCmd = new G4UIcmdWithAString("/LSC/det/geometrydata", this);
   fPMTPositionDataFileCmd = new G4UIcmdWithAString("/LSC/det/pmtposdata", this);
   fWhichDetectorCmd = new G4UIcmdWithAString("/LSC/det/detector", this);
-  fLightConcentratorCmd = new G4UIcmdWithAnInteger("/LSC/det/lightconcentrator", this);
-  fLightConProfileCmd = new G4UIcmdWithAString("/LSC/det/lightconprofile", this);
 
   fGeometryDataFile = "";
   fPMTPositionDataFile = "";
   fMaterialDataFile = "";
-  fWhichDetector = "";
-  fLightConcentrator = 0; // default is no light concentrator
-  fLightConProfile = "";
+  fWhichDetector = "LS";
 }
 
 LSCDetectorConstruction::~LSCDetectorConstruction()
@@ -67,9 +63,6 @@ LSCDetectorConstruction::~LSCDetectorConstruction()
   delete fMaterialDataFileCmd;
   delete fGeometryDataFileCmd;
   delete fPMTPositionDataFileCmd;
-  delete fWhichDetectorCmd;
-  delete fLightConcentratorCmd;
-  delete fLightConProfileCmd;
 }
 
 void LSCDetectorConstruction::SetNewValue(G4UIcommand * command,
@@ -89,16 +82,7 @@ void LSCDetectorConstruction::SetNewValue(G4UIcommand * command,
   if (command == fPMTPositionDataFileCmd) {
     if (fPMTPositionDataFile.empty()) fPMTPositionDataFile = newValues;
   }
-  if (command == fWhichDetectorCmd) {
-    if (fWhichDetector.empty()) fWhichDetector = newValues;
-  }
-  if (command == fLightConcentratorCmd) {
-    istringstream is(newValues);
-    is >> fLightConcentrator;
-  }
-  if (command == fLightConProfileCmd) {
-    if (fLightConProfile.empty()) fLightConProfile = newValues;
-  }
+  if (command == fWhichDetectorCmd) { fWhichDetector = newValues; }
 }
 
 G4VPhysicalVolume * LSCDetectorConstruction::Construct()
@@ -121,6 +105,22 @@ G4VPhysicalVolume * LSCDetectorConstruction::ConstructDetector()
     geom_db.ReadFile(fGeometryDataFile.c_str());
   }
 
+  // Visualization attributes
+  auto visair = new G4VisAttributes();
+  visair->SetForceSolid(true);
+  visair->SetColour(G4Colour(0.3, 0.3, 0.3, 0.3));
+
+  auto visssteel = new G4VisAttributes();
+  visssteel->SetForceSolid(true);
+  // visssteel->SetColour(G4Colour::Black());  
+  visssteel->SetColour(G4Colour(0.64, 0.7, 0.73, 1));
+
+  auto viswater = new G4VisAttributes();
+  viswater->SetForceSolid(true);
+  // viswater->SetColour(G4Colour(0,0,1,0.7)); // blue
+  viswater->SetColour(G4Colour(0.03, 0.49, 0.69, 0.7));
+
+
   // World (Rock)
   G4double worldX = cm * geom_db["worldx"];
   G4double worldY = cm * geom_db["worldy"];
@@ -132,6 +132,80 @@ G4VPhysicalVolume * LSCDetectorConstruction::ConstructDetector()
   auto WorldPhys = new G4PVPlacement(0, G4ThreeVector(), WorldLog, "WorldPhys",
                                      0, false, 0, fGeomCheck);
 
+  // Cavern (Top)
+  G4double cavernR = cm * geom_db["cavern_arch_radius"];
+  G4double cavernH = cm * geom_db["cavern_arch_height"];
+  G4double cavernT = cm * geom_db["cavern_arch_thickness"];
+  G4double cavernA = deg * geom_db["cavern_arch_angle"];
+  auto CavernTubs = new G4Tubs("CavernTubs", cavernR - cavernH / 8, cavernR,
+                                cavernH / 2, 0 * deg, cavernA * 2);
+
+  // Cavern (Bottom)
+  G4double cavernX = cm * geom_db["cavern_arch_height"];
+  G4double cavernY = cm * geom_db["cavern_arch_height"];
+  G4double cavernZ = cm * geom_db["cavern_height"];
+  auto CavernBox = new G4Box("CavernBox", cavernX / 2, cavernY / 2,
+                              (cavernZ - cavernT) / 2.);
+  auto CavernRot = new G4RotationMatrix();
+  CavernRot->rotateZ(-cavernA);
+  CavernRot->rotateY(-90 * deg);
+
+  // Pit
+  G4double pitR = cm * geom_db["pit_radius"];
+  G4double pitH = cm * geom_db["pit_height"];
+  auto PitTubs = new G4Tubs("PitTubs", 0, pitR, pitH / 2, 0, 360 * deg);
+
+  // Cavern (Union of pit, tunnel, top and bottom caverns)
+  auto CavernUni = new G4UnionSolid(
+      "CavernUni", CavernBox, CavernTubs,
+      G4Transform3D(*CavernRot, G4ThreeVector(0, 0,
+                                              CavernBox->GetZHalfLength() -
+                                                  (cavernR - cavernH / 10))));
+  CavernUni = new G4UnionSolid(
+      "CavernUni", PitTubs, CavernUni, 0,
+      G4ThreeVector(0, 0, pitH / 2. + CavernBox->GetZHalfLength()));
+
+  auto CavernLog = new G4LogicalVolume(
+      CavernUni, G4Material::GetMaterial("Air"), "CavernLog");
+  CavernLog->SetVisAttributes(visair);
+  auto CavernPhys =
+      new G4PVPlacement(0, G4ThreeVector(), CavernLog, "CavernPhys", WorldLog,
+                        false, 0, fGeomCheck);
+
+  // Veto
+  G4VPhysicalVolume * VetoLiquidPhys = nullptr;
+  if (fWhichDetector !=  "PROTO") {
+    G4double vetoR = cm * geom_db["veto_radius"];
+    G4double vetoH = cm * geom_db["veto_height"];
+    G4double vetoT = cm * geom_db["veto_thickness"];
+    auto VetoTankTubs =
+      new G4Tubs("VetoTankTubs", 0, vetoR, vetoH / 2, 0, 360 * deg);
+    auto VetoTankLog = new G4LogicalVolume(
+					   VetoTankTubs, G4Material::GetMaterial("Steel"), "VetoTankLog", 0, 0, 0);
+    // VetoTankLog->SetVisAttributes(G4Colour::White());
+    VetoTankLog->SetVisAttributes(visssteel);
+    auto VetoTankPhys =
+      new G4PVPlacement(0, G4ThreeVector(), VetoTankLog, "VetoTankPhys",
+                        CavernLog, false, 0, fGeomCheck);
+                        //WorldLog, false, 0, fGeomCheck);
+
+    auto VetoLiquidTubs = new G4Tubs("VetoLiquidTubs", 0, vetoR - vetoT,
+				     vetoH / 2 - vetoT, 0, 360 * deg);
+    auto VetoLiquidLog =
+      new G4LogicalVolume(VetoLiquidTubs, G4Material::GetMaterial("Water"),
+                          "VetoLiquidLog", 0, 0, 0);
+    // VetoLiquidLog->SetVisAttributes(G4Colour(0, 0, 1, 0.1));
+    VetoLiquidLog->SetVisAttributes(viswater);
+    VetoLiquidPhys =
+      new G4PVPlacement(0, G4ThreeVector(), VetoLiquidLog, "VetoLiquidPhys",
+                        VetoTankLog, false, 0, fGeomCheck);
+
+    new G4LogicalBorderSurface("veto_logsurf1", VetoTankPhys, VetoLiquidPhys,
+			       Stainless_opsurf);
+    new G4LogicalBorderSurface("veto_logsurf2", VetoLiquidPhys, VetoTankPhys,
+			       Stainless_opsurf);
+  }
+  
   ///////////////////////////////////////////////////////////////////////////
   // --- PMT sensitive detector
   ///////////////////////////////////////////////////////////////////////////
@@ -139,10 +213,10 @@ G4VPhysicalVolume * LSCDetectorConstruction::ConstructDetector()
   LSCPMTSD * pmtSDInner = new LSCPMTSD("/LSC/PMT/inner");
   fSDman->AddNewDetector(pmtSDInner);
 
-  if (fWhichDetector == "LSC")
-    ConstructDetector_LSC(WorldPhys, pmtSDInner, geom_db);
-  else if (fWhichDetector == "SPHERE")
-    ConstructDetector_LSC_sphere(WorldPhys, pmtSDInner, geom_db);
+  if (fWhichDetector == "LSCC")
+    ConstructDetector_LSC_Cylinder(VetoLiquidPhys, pmtSDInner, geom_db);
+  else if (fWhichDetector == "LSCS")
+    ConstructDetector_LSC_Sphere(VetoLiquidPhys, pmtSDInner, geom_db);    
   else if (fWhichDetector == "PROTO")
     ConstructDetector_Prototype(WorldPhys, pmtSDInner, geom_db);
 
