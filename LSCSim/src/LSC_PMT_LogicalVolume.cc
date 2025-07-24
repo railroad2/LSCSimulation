@@ -17,7 +17,6 @@
 #include "G4VisAttributes.hh" // for G4VisAttributes::Invisible
 #include "GLG4Sim/GLG4TorusStack.hh"
 #include "LSCSim/LSCPMTOpticalModel.hh"
-#include "LSCSim/LightCon.hh"
 
 using namespace CLHEP;
 
@@ -172,6 +171,7 @@ LSC_17inch_LogicalVolume::LSC_17inch_LogicalVolume(
     //    G4VisAttributes * visAtt= new
     //    G4VisAttributes(G4Color(0.0,0.0,0.0,1.0));
     G4VisAttributes * visAtt = new G4VisAttributes(G4Color(1.0, 1.0, 0.0, 0.3));
+    visAtt->SetForceSolid(true);
     mask_log->SetVisAttributes(visAtt);
 
     // extra torus mask for 17-inch
@@ -281,6 +281,7 @@ LSC_20inch_LogicalVolume::LSC_20inch_LogicalVolume(
     //    G4VisAttributes * visAtt= new
     //    G4VisAttributes(G4Color(0.0,0.0,0.0,1.0));
     G4VisAttributes * visAtt = new G4VisAttributes(G4Color(0.8, 0.8, 0.8, 1.0));
+    visAtt->SetForceSolid(true);
     mask_log->SetVisAttributes(visAtt);
   }
 }
@@ -314,7 +315,6 @@ LSC_10inch_LogicalVolume::LSC_10inch_LogicalVolume(
       DynodeMat,           // dynode stack metal
       detector             // detector hook
   );
-  
 
   if (MaskMat != NULL) {
     // make the mask -- use thin cylindrical disk for now
@@ -565,6 +565,7 @@ void LSC_PMT_LogicalVolume::ConstructPMT_UsingTorusStack(
   G4LogicalVolume * body_log =
       new G4LogicalVolume(body_solid, Glass, GetName() + "_body_log");
   body_log->SetSensitiveDetector(detector);
+	G4cout << "PMT Glass mass:" << body_log->GetMass(true, false)/kg << " kg" << G4endl;
 
   G4LogicalVolume * inner1_log =
       new G4LogicalVolume(inner1_solid, PMT_Vac, GetName() + "_inner1_log");
@@ -648,15 +649,20 @@ void LSC_PMT_LogicalVolume::ConstructPMT_UsingTorusStack(
   this->SetVisAttributes(G4VisAttributes::GetInvisible());
   //  PMT glass
   visAtt = new G4VisAttributes(G4Color(0.0, 1.0, 1.0, 0.05));
+  visAtt->SetForceSolid(true);
   body_log->SetVisAttributes(visAtt);
   // body_log->SetVisAttributes(G4VisAttributes::GetInvisible());
   //  dynode is medium gray
   visAtt = new G4VisAttributes(G4Color(0.5, 0.5, 0.5, 1.0));
+  visAtt->SetForceSolid(true);
   dynode_log->SetVisAttributes(visAtt);
   // (surface of) interior vacuum is clear orangish gray on top (PC),
   // silvery blue on bottom (mirror)
-  visAtt = new G4VisAttributes(G4Color(0.7, 0.5, 0.3, 0.27));
+  //visAtt = new G4VisAttributes(G4Color(0.7, 0.5, 0.3, 0.27));
+  visAtt = new G4VisAttributes(G4Color(0.7, 0.5, 0.3, 0.47));
+  visAtt->SetForceSolid(true);
   inner1_log->SetVisAttributes(visAtt);
   visAtt = new G4VisAttributes(G4Color(0.6, 0.7, 0.8, 0.67));
+  visAtt->SetForceSolid(true);
   inner2_log->SetVisAttributes(visAtt);
 }

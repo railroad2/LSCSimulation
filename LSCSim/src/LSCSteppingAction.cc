@@ -14,14 +14,10 @@ LSCSteppingAction::~LSCSteppingAction() {}
 
 void LSCSteppingAction::UserSteppingAction(const G4Step * theStep)
 {
-  /*
-  G4cout << "UserSteppingAction"  << '\t'
-         << theStep->GetTrack()->GetTrackID() << '\t'
-         << G4endl; // kmlee debug
-         */
   G4SteppingManager * steppingManager = fpSteppingManager;
   G4VProcess * proc = steppingManager->GetfCurrentProcess();
 
+  /*
   G4StepPoint* postStepPoint = theStep->GetPostStepPoint();
   G4Track* theTrack = theStep->GetTrack();
 
@@ -35,6 +31,6 @@ void LSCSteppingAction::UserSteppingAction(const G4Step * theStep)
       //G4cout << "Optical photon hit PMT: " << theTrack->GetTrackID() << G4endl;
     }
   }
-
+  */
   if (fRecorder) fRecorder->RecordStep(theStep, proc);
 }
