@@ -98,8 +98,8 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
   our_Mirror_opsurf->SetPolish(0.999);
   G4MaterialPropertiesTable* propMirror = new G4MaterialPropertiesTable();
   propMirror->AddProperty("REFLECTIVITY", new G4MaterialPropertyVector());
-  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 0.9999);
-  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.9999);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 0.90);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.90);
   our_Mirror_opsurf->SetMaterialPropertiesTable(propMirror);
 
   char PMTname[64];
@@ -128,10 +128,15 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
     double angle_z = atan2(dx, dy);
     double angle_x = atan2(dz, sqrt(dx * dx + dy * dy));
 
-    if (region == 0) { // cylinder wall
+    string ftmp = fPMTPositionDataFile;  
+    transform(ftmp.begin(), ftmp.end(), ftmp.begin(), ::tolower);
+    if (ftmp.find("sphere")) {
+      angle_x = atan2(dz, sqrt(dx * dx + dy * dy));
+    }
+    else if (region == 0) { // cylinder wall
       angle_x = 0; 
     }
-    if (region == -1 || region == 1) { // top or bottom PMTs
+    else if (region == -1 || region == 1) { // top or bottom PMTs
         double normal_angle = (region > 0 ? -M_PI / 2 : M_PI / 2);
         angle_x = normal_angle;
     }
