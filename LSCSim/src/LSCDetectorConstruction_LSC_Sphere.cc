@@ -128,6 +128,7 @@ void LSCDetectorConstruction::ConstructDetector_LSC_Sphere(
   auto TargetLSPhys =
       new G4PVPlacement(0, G4ThreeVector(), TargetLSLog, "TargetLSPhys",
                         TargetTankLog, false, fGeomCheck);
+  G4cout << "Target mass:" << TargetLSLog->GetMass(true, false)/kg << " kg" << G4endl;
 
   // Place PMTs
   ConstructDetector_LSC_PMT(BufferLiquidPhys, pmtsd);
