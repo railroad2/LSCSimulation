@@ -464,7 +464,7 @@ void LSCPhysicsList::ConstructOp()
   scint->AddSaturation(emSaturation);
 
   // Cerenkov
-  auto cerenkov = new LSCCerenkov();
+  auto cerenkov = new LSCCerenkov("Cerenkov");
   cerenkov->SetTrackSecondariesFirst(true);
 
   auto myParticleIterator = GetParticleIterator();

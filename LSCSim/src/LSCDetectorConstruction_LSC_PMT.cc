@@ -37,11 +37,11 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
                 FatalException, msg);
   }
 
-  if (access(fLightConProfile.c_str(), F_OK) != 0) {
-    G4String msg = "Error, light concentrator profile file could not be opened.\n";
+  if (fLightConcentrator && fLightConProfile.empty()) {
+    G4String msg = "Warning, light concentrator profile file could not be opened.\n";
     G4cerr << msg << G4endl;
-    G4Exception("LSCDetectorConstruction::LSCDetectorConstruction", "",
-                FatalException, msg);
+    //G4Exception("LSCDetectorConstruction::LSCDetectorConstruction", "",
+    //            FatalException, msg);
     fLightConcentrator = false;
   }
 
@@ -50,23 +50,23 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
   G4PVPlacement *lc_phys = nullptr;
   G4PVPlacement *lc_phys2 = nullptr;
 
+
+  double z_lc = 105*mm; // z-position of light concentrator
+  G4double r_tube = 13.5*cm;
+  G4double z_tube = 20.0*cm;
+
   if (fLightConcentrator) {
     lc = new LightCon();
     G4cout << "Constructing light concentrator with profile: "
             << fLightConProfile << G4endl;
     lc_log = lc->Construct_LightCon(fLightConProfile);
     lc_log->SetVisAttributes(new G4VisAttributes(G4Colour(0, 0, 1, 0.3)));
+    r_tube = lc->GetRMax();
+    z_tube = lc->GetZMax() + z_lc;
+
+    G4cout << "r_tube = " << r_tube << endl;
+    G4cout << "z_tube = " << z_tube << endl;
   }
-
-  double z_lc = 105*mm; // z-position of light concentrator
-  G4double r_tube = 13.5*cm;
-  G4double z_tube = 20.0*cm;
-
-  r_tube = lc->GetRMax();
-  z_tube = lc->GetZMax() + z_lc;
-
-  G4cout << r_tube << endl;
-  G4cout << z_tube << endl;
 
   auto pmt_assembly = new G4Tubs("pmt_assembly", 0,  r_tube, z_tube, 
                             0, 360*deg);
