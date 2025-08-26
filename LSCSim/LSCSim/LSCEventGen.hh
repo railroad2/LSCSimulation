@@ -51,6 +51,7 @@ public:
 
     // set functions
     void SetSeed(long seed=-1);
+    void SetPosition(G4ThreeVector pos) { _pos = pos; }
     void SetPositionSource(G4ThreeVector pos) { _pos_source = pos; }
     void SetDetShape(G4String detshape) { _det_shape = detshape; }
 

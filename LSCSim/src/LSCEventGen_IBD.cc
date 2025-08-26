@@ -95,11 +95,11 @@ void LSCEventGen_IBD::GenerateEvent(double Ev, G4ThreeVector uv, double theta)
 
 void LSCEventGen_IBD::SetForm_HEPEvt()
 {
-    // neutrino
     Form_HEPEvt tmp;
     vector<Form_HEPEvt> evt;
     double to_GeV = 1e-3;
 
+    // neutrino
     tmp = {1, -12, 0, 0, 
            _pv0.x()*to_GeV, _pv0.y()*to_GeV, _pv0.z()*to_GeV, // momentum in GeV
            _pv0.m()*to_GeV,               // mass in GeV
