@@ -82,9 +82,9 @@ public:
     LSCEventGen_IBD(const char * arg_dbname="");
     ~LSCEventGen_IBD() {}
 
-    virtual void GeneratePrimaryVertex(G4Event * argEvent);
-    virtual void SetState(G4String newValues) {}
-    virtual G4String GetState() { return ""; }
+    void GeneratePrimaryVertex(G4Event * argEvent);
+    void SetState(G4String newValues) {}
+    G4String GetState() { return ""; }
 
     void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
     void SetForm_HEPEvt();
@@ -111,9 +111,9 @@ public:
     LSCEventGen_ve(const char * arg_dbname="");
     ~LSCEventGen_ve() {}
 
-    virtual void GeneratePrimaryVertex(G4Event * argEvent);
-    virtual void SetState(G4String newValues) {}
-    virtual G4String GetState() { return ""; }
+    void GeneratePrimaryVertex(G4Event * argEvent);
+    void SetState(G4String newValues) {}
+    G4String GetState() { return ""; }
 
     void GenerateEvent(double Ev, G4ThreeVector uv, double theta=-1);
     void SetForm_HEPEvt();
@@ -136,6 +136,23 @@ private:
     G4LorentzVector _pe0; // initial electron
     G4LorentzVector _pv1; // neutrino
     G4LorentzVector _pe1; // electron
+};
+
+
+class LSCEventGen_op : public LSCEventGen 
+{
+public:
+    LSCEventGen_op(const char * arg_dbname="");
+    ~LSCEventGen_op() {}
+
+    void GeneratePrimaryVertex(G4Event * argEvent) {};
+    void SetState(G4String newValues) {}
+    G4String GetState() { return ""; }
+
+    void GenerateEvent(int nphotons, double E);
+    void SetForm_HEPEvt() {};
+private:
+    int _nphotons = 0;
 };
 
 #endif
