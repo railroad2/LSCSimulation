@@ -9,7 +9,7 @@ using namespace std;
 
 G4String detshape = "sphere";
 
-G4ThreeVector string2dir(string input);
+G4ThreeVector string2vec(string input);
 int opticalphotons(int nevent, double nphotons, double Ev, G4ThreeVector pos);
 bool exists(const G4String &fname);
 void PrintHelp();
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
             case 'e': Eop = atof(optarg); break;
             case 'k': nphotons = atof(optarg); break;
             case 'd': detshape= G4String(optarg); break;
-            case 'p': pos = string2dir(optarg); break;
+            case 'p': pos = string2vec(optarg); break;
             case 'h': PrintHelp(); break;
             default: PrintHelp();
         }
@@ -79,12 +79,13 @@ int opticalphotons(int nevent, double nphotons, double Ev, G4ThreeVector pos)
     return 0;
 }
 
-G4ThreeVector string2dir(string input) 
+G4ThreeVector string2vec(string input) 
 {
     char separator = ',';    
     istringstream iss(input);
     string str_buf;
     vector<double> vec;
+
     while (getline(iss, str_buf, separator)) {
         vec.push_back(stof(str_buf));
     }

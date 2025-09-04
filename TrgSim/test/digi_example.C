@@ -9,8 +9,9 @@ void digi_example()
 
   pmt->AddHitTime(0);
   pmt->SetModel(PMTSignal::MOYAL);
-  //pmt->Draw();
+  pmt->Draw();
 
+  new TCanvas();
   auto fadc = new FADCWaveformGenerator();
   fadc->SetNBIT(12);
   fadc->SetVpp(200);

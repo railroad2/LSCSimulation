@@ -43,7 +43,7 @@ void LSCTrackingAction::PostUserTrackingAction(const G4Track * aTrack)
 
   // Let's choose to draw only the photons that hit the sphere and a pmt
   if (aTrack->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) {
-    trajectory->SetDrawTrajectory(true);
+    //trajectory->SetDrawTrajectory(true);
     const G4VProcess * creator = aTrack->GetCreatorProcess();
 
     if (creator && creator->GetProcessName() == "OpWLS") {

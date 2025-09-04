@@ -151,6 +151,8 @@ public:
 
     void GenerateEvent(int nphotons, double E);
     void SetForm_HEPEvt() {};
+
+    G4ThreeVector gen_pol_rand(G4ThreeVector);
 private:
     int _nphotons = 0;
 };

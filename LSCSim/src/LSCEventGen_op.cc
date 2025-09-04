@@ -27,22 +27,36 @@ void LSCEventGen_op::GenerateEvent(int nphotons, double E)
     double to_GeV = 1e-3;
     G4ThreeVector dir; 
     G4ThreeVector mom; 
+    G4ThreeVector rpol;
 
     for (int i=0; i<nphotons; i++) {
         dir = G4RandomDirection();
         mom = dir * E;
+
+        rpol = gen_pol_rand(dir); 
+
         // optical photon
         tmp = {1, IDop, 0, 0, 
                mom.x()*to_GeV, mom.y()*to_GeV, mom.z()*to_GeV, // momentum in GeV
                E*to_GeV,                      // mass in GeV
                0,                             // dt in ns
                _pos.x(), _pos.y(), _pos.z(),  // vertex _position in mm
-               0, 0, 0};                      // polarization
+               rpol.x(), rpol.y(), rpol.z(),   // random polarization
+              };   
+
         evt.push_back(tmp); 
     }
 
     _evt = evt;
 }
 
+G4ThreeVector LSCEventGen_op::gen_pol_rand(G4ThreeVector dir)
+{
+    G4ThreeVector dirn = dir / dir.mag();
+    G4ThreeVector pol = G4RandomDirection();
+    pol = pol - dirn * dirn.dot(pol);
+    pol = pol / pol.mag();
 
+    return pol;
 
+}

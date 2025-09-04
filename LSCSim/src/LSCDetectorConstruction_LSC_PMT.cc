@@ -98,8 +98,8 @@ void LSCDetectorConstruction::ConstructDetector_LSC_PMT(
   our_Mirror_opsurf->SetPolish(0.999);
   G4MaterialPropertiesTable* propMirror = new G4MaterialPropertiesTable();
   propMirror->AddProperty("REFLECTIVITY", new G4MaterialPropertyVector());
-  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 0.90);
-  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 0.90);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (800.0e-9 * m), 1.00);
+  propMirror->AddEntry("REFLECTIVITY", twopi*hbarc / (200.0e-9 * m), 1.00);
   our_Mirror_opsurf->SetMaterialPropertiesTable(propMirror);
 
   char PMTname[64];
