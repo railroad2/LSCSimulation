@@ -44,7 +44,7 @@ void FADCWaveformGenerator::Prepare()
   }
   fWaveformHist->Reset();
 
-  if (fSignal) { fSignal->Prepare(); }
+  if (fSignal && fSignal->IsPrepared() ) { fSignal->Prepare(); }
 }
 
 void FADCWaveformGenerator::Digitize()
@@ -57,7 +57,8 @@ void FADCWaveformGenerator::Digitize()
 
   for (int j = 1; j <= nbin; j++) {
     double time = fWaveformHist->GetBinCenter(j) * fBinTimeWidth;
-    double ped = fRandom->Gaus(fPedOffset, fPedRMS * fResolution / fVpp);
+    //double ped = fRandom->Gaus(fPedOffset, fPedRMS * fResolution / fVpp);
+    double ped = fRandom->Gaus(fPedOffset, fPedRMS * fVpp / fResolution);
     double sig = 0;
     if (fSignal) { sig = covfactor * fSignal->EvalPulseHeight(time); }
     sig += ped;

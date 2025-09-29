@@ -17,6 +17,7 @@ public:
 
   virtual double GetTimeMinimum() const;
   virtual double GetTimeMaximum() const;
+  bool IsPrepared() const; 
 
   virtual void Draw(Option_t * option = "");  
 
@@ -34,5 +35,5 @@ protected:
 
 inline double AbsSignal::GetTimeMinimum() const { return fMinimumTime; }
 inline double AbsSignal::GetTimeMaximum() const { return fMaximumTime; }
-
+inline bool AbsSignal::IsPrepared() const { return fIsPrepared; }
 #endif
